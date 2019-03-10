@@ -33,22 +33,20 @@ package object all {
 
   implicit def socketTransport(implicit system: ActorSystem): Transport[SocketChannel] = {
     implicitly[Try[Transport[EpollSocketChannel]]]
-      .recoverWith[Transport[_ <: SocketChannel]] {
+      .recoverWith {
         case _: UnsatisfiedLinkError => implicitly[Try[Transport[KQueueSocketChannel]]]
       }
-      .recover[Transport[_ <: SocketChannel]] {
+      .recover {
         case _: UnsatisfiedLinkError => implicitly[Transport[NioSocketChannel]]
       }
-      .map(_.asInstanceOf[Transport[SocketChannel]])
       .get
   }
 
   implicit def domainTransport(implicit system: ActorSystem): Transport[DomainSocketChannel] = {
     implicitly[Try[Transport[EpollDomainSocketChannel]]]
-      .recoverWith[Transport[_ <: DomainSocketChannel]] {
+      .recoverWith {
         case _: UnsatisfiedLinkError => implicitly[Try[Transport[KQueueDomainSocketChannel]]]
       }
-      .map(_.asInstanceOf[Transport[DomainSocketChannel]])
       .get
   }
 

@@ -30,9 +30,9 @@ import Netty._
 import scala.concurrent.{Channel => _, _}
 import scala.concurrent.duration.Duration
 
-abstract class Transport[C <: DuplexChannel](implicit system: ActorSystem) {
+abstract class Transport[+C <: DuplexChannel](implicit system: ActorSystem) {
 
-  protected def channelClass: Class[C]
+  protected def channelClass: Class[_ <: C]
   protected def serverChannelClass: Class[_ <: ServerChannel]
   protected def group: EventLoopGroup
 
