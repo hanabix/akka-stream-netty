@@ -15,22 +15,15 @@
  */
 
 package zhongl.stream.netty
+import akka.actor.ActorSystem
+import io.netty.channel.nio.NioEventLoopGroup
+import io.netty.channel.socket.nio._
 
-import java.util
-
-import akka.util.ByteString
-import io.netty.buffer.ByteBuf
-import io.netty.channel._
-import io.netty.handler.codec.ByteToMessageCodec
-
-class ByteToByteStringCodec extends ByteToMessageCodec[ByteString] {
-  override def encode(ctx: ChannelHandlerContext, msg: ByteString, out: ByteBuf): Unit = {
-    out.writeBytes(msg.asByteBuffer)
+package object jvm {
+  implicit def jvm(implicit sys: ActorSystem): Transport[NioSocketChannel] = new Transport[NioSocketChannel] {
+    override protected def channelClass = classOf[NioSocketChannel]
+    override protected def serverChannelClass = classOf[NioServerSocketChannel]
+    override protected def group = new NioEventLoopGroup()
   }
 
-  override def decode(ctx: ChannelHandlerContext, in: ByteBuf, out: util.List[AnyRef]): Unit = {
-    val bytes = Array.ofDim[Byte](in.readableBytes())
-    in.readBytes(bytes)
-    out.add(ByteString(bytes))
-  }
 }

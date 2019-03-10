@@ -21,19 +21,20 @@ lazy val core = (project in file("core"))
 lazy val epoll = (project in file("epoll"))
   .settings(
     commonSettings("epoll"),
-    libraryDependencies ++= `netty-`("transport-native-epoll")
+    libraryDependencies ++= `netty-`("transport-native-epoll").map(_.classifier("linux-x86_64"))
   )
   .dependsOn(core)
 
 lazy val kqueue = (project in file("kqueue"))
   .settings(
     commonSettings("kqueue"),
-    libraryDependencies ++= `netty-`("transport-native-kqueue")
+    libraryDependencies ++= `netty-`("transport-native-kqueue").map(_.classifier("osx-x86_64"))
   )
   .dependsOn(core)
 
-lazy val unix = (project in file("unix"))
+lazy val all = (project in file("all"))
   .settings(
-    commonSettings("unix")
+    commonSettings("all"),
+    libraryDependencies ++= common ++ akka
   )
   .dependsOn(epoll, kqueue)
