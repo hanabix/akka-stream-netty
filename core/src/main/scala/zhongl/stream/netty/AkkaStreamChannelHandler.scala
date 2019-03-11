@@ -59,7 +59,7 @@ class AkkaStreamChannelHandler[In, Out](sourceQ: SourceQueueWithComplete[In], si
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
-    log.error(cause, "Close channel [{}] by", ctx.channel())
+    log.error(cause, "[{}] close by", ctx.channel())
     ctx.close()
   }
 
