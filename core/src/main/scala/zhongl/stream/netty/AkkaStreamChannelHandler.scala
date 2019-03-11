@@ -21,7 +21,6 @@ import akka.event.LoggingAdapter
 import akka.stream.QueueOfferResult
 import akka.stream.scaladsl.{SinkQueueWithCancel, SourceQueueWithComplete}
 import io.netty.channel._
-import io.netty.channel.socket.DuplexChannel
 
 import scala.concurrent.ExecutionContext
 
@@ -37,12 +36,16 @@ class AkkaStreamChannelHandler[In, Out](sourceQ: SourceQueueWithComplete[In], si
     ExecutionContexts.fromExecutorService(ctx.executor())
   }
 
+  private var sinkCompleted = false
+
   override def channelActive(ctx: ChannelHandlerContext): Unit = {
+    log.debug("[{}] active", ctx.channel())
     ctx.read()
     pullSourceToOutBound(ctx)
   }
 
   override def channelInactive(ctx: ChannelHandlerContext): Unit = {
+    log.debug("[{}] inactive", ctx.channel())
     sourceQ.complete()
     sinkQ.cancel()
   }
@@ -56,7 +59,7 @@ class AkkaStreamChannelHandler[In, Out](sourceQ: SourceQueueWithComplete[In], si
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
-    log.error(cause, "Close channel by error")
+    log.error(cause, "Close channel [{}] by", ctx.channel())
     ctx.close()
   }
 
@@ -65,31 +68,31 @@ class AkkaStreamChannelHandler[In, Out](sourceQ: SourceQueueWithComplete[In], si
       new IllegalStateException("Element should not be dropped, please check overflow strategy.")
     }
 
-    @inline def shutdownInputOrClose: Channel => Unit = {
-      case ch: DuplexChannel if !ch.isOutputShutdown => ch.shutdownInput().addListener(catchFailure(ctx))
-      case ch if ch.isOpen                           => ch.close()
-      case _                                         => // ignore
+    @inline def debug[A, B](result: A)(f: A => B): B = {
+      log.debug(s"[{}] offer {}", ctx.channel(), result)
+      f(result)
     }
+
+    log.debug(s"[{}] read {}", ctx.channel(), msg)
 
     sourceQ
       .offer(msg.asInstanceOf[In])
-      .map {
-        case QueueOfferResult.Enqueued    => ctx.read()
-        case QueueOfferResult.QueueClosed => shutdownInputOrClose(ctx.channel())
-        case QueueOfferResult.Dropped     => exceptionCaught(ctx, illegal)
-        case QueueOfferResult.Failure(e)  => exceptionCaught(ctx, e)
-      }
+      .map(debug(_) {
+        case QueueOfferResult.QueueClosed               => ctx.close()
+        case QueueOfferResult.Enqueued if sinkCompleted => ctx.close() // As a client, close channel if no more request
+        case QueueOfferResult.Enqueued                  => ctx.read()  // As a client, keep on reading
+        case QueueOfferResult.Dropped                   => exceptionCaught(ctx, illegal)
+        case QueueOfferResult.Failure(e)                => exceptionCaught(ctx, e)
+      })
       .failed
-      .foreach(_ => shutdownInputOrClose(ctx.channel())) // source was completed
+      .foreach { _ =>
+        log.debug(s"[{}] source completed", ctx.channel())
+        ctx.close()
+      }
 
   }
 
   private def pullSourceToOutBound(implicit ctx: ChannelHandlerContext): Unit = {
-    @inline def shutdownOutputOrClose: Channel => Unit = {
-      case ch: DuplexChannel if !ch.isInputShutdown => ch.shutdownOutput().addListener(catchFailure(ctx))
-      case ch if ch.isOpen                          => ch.close()
-      case _                                        => //ignore
-    }
 
     @inline def writeAndFlush(e: Out): Unit = {
       ctx
@@ -103,8 +106,8 @@ class AkkaStreamChannelHandler[In, Out](sourceQ: SourceQueueWithComplete[In], si
       sinkQ
         .pull()
         .map {
-          case Some(e) => writeAndFlush(e)
-          case None    => shutdownOutputOrClose(ctx.channel()) // sink was completed
+          case Some(e) => log.debug("[{}] write {}", ctx.channel(), e); writeAndFlush(e)
+          case None    => log.debug("[{}] sink completed", ctx.channel()); sinkCompleted = true
         }
         .failed
         .foreach(exceptionCaught(ctx, _))
@@ -112,7 +115,4 @@ class AkkaStreamChannelHandler[In, Out](sourceQ: SourceQueueWithComplete[In], si
 
   }
 
-  @inline private def catchFailure(ctx: ChannelHandlerContext): ChannelFutureListener = { f: ChannelFuture =>
-    if (!f.isSuccess) exceptionCaught(ctx, f.cause())
-  }
 }

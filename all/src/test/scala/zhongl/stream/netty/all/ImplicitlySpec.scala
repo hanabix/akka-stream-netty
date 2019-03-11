@@ -13,8 +13,6 @@ import io.netty.channel.unix._
 import org.scalatest._
 import zhongl.stream.netty._
 
-import scala.concurrent.duration._
-
 class ImplicitlySpec extends TestKit(ActorSystem("implicitly")) with AsyncWordSpecLike with Matchers with BeforeAndAfterAll {
 
   implicit val mat = ActorMaterializer()
@@ -36,16 +34,13 @@ class ImplicitlySpec extends TestKit(ActorSystem("implicitly")) with AsyncWordSp
   }
 
   private def runEcho[C <: DuplexChannel](address: SocketAddress)(implicit t: Transport[C]) = {
-    Netty().bindAndHandle[C](Flow[ByteString].map(identity), address, halfClose = true).flatMap { sb =>
+    Netty().bindAndHandle[C](Flow[ByteString].map(identity), address).flatMap { sb =>
       val msg = ByteString("a")
-      Source.repeat(msg)
-        .delay(1.seconds) // avoid head of empty stream
+      Source.single(msg)
         .via(Netty().outgoingConnection[C](address))
         .runWith(Sink.head)
         .map(_ shouldBe msg)
-        .flatMap { a =>
-          sb.unbind().map(_ => a)
-        }
+        .flatMap(a => sb.unbind().map(_ => a))
     }
   }
   override protected def afterAll(): Unit = TestKit.shutdownActorSystem(system)
