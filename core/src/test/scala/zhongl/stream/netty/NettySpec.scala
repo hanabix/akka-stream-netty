@@ -35,16 +35,14 @@ class NettySpec extends TestKit(ActorSystem("netty")) with AsyncWordSpecLike wit
   "Netty" should {
     "use nio transport" in {
       val address = new InetSocketAddress("localhost", 12306)
-      Netty().bindAndHandle[NioSocketChannel](Flow[ByteString].map(identity), address, halfClose = true).flatMap { sb =>
+      Netty().bindAndHandle[NioSocketChannel](Flow[ByteString].map(identity), address).flatMap { sb =>
         val msg = ByteString("a")
         Source
           .single(msg)
           .via(Netty().outgoingConnection[NioSocketChannel](address))
           .runWith(Sink.head)
           .map(_ shouldBe msg)
-          .flatMap { a =>
-            sb.unbind().map(_ => a)
-          }
+          .flatMap(a => sb.unbind().map(_ => a))
       }
     }
   }
