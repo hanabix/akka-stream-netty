@@ -27,8 +27,8 @@ package object kqueue {
       case e: Throwable => Failure(e)
     }).map(_ =>
       new Transport[KQueueSocketChannel] {
-        override protected def channelClass = classOf[KQueueSocketChannel]
-        override protected def serverChannelClass = classOf[KQueueServerSocketChannel]
+        override def channelClass = classOf[KQueueSocketChannel]
+        override def serverChannelClass = classOf[KQueueServerSocketChannel]
         override protected def group = new KQueueEventLoopGroup()
     })
 
@@ -40,8 +40,8 @@ package object kqueue {
       case e: Throwable => Failure(e)
     }).map(_ =>
       new Transport[KQueueDomainSocketChannel] {
-        override protected def channelClass = classOf[KQueueDomainSocketChannel]
-        override protected def serverChannelClass = classOf[KQueueServerDomainSocketChannel]
+        override def channelClass = classOf[KQueueDomainSocketChannel]
+        override def serverChannelClass = classOf[KQueueServerDomainSocketChannel]
         override protected def group = new KQueueEventLoopGroup(1) // one thread enough for the domain socket scenario.
     })
 

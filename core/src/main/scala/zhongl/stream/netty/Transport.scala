@@ -32,8 +32,9 @@ import scala.concurrent.duration.Duration
 
 abstract class Transport[+C <: DuplexChannel](implicit system: ActorSystem) {
 
-  protected def channelClass: Class[_ <: C]
-  protected def serverChannelClass: Class[_ <: ServerChannel]
+  def channelClass: Class[_ <: C]
+  def serverChannelClass: Class[_ <: ServerChannel]
+
   protected def group: EventLoopGroup
 
   private lazy val _group = {

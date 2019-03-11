@@ -28,8 +28,8 @@ package object epoll {
       case e: Throwable => Failure(e)
     }).map(_ =>
       new Transport[EpollSocketChannel] {
-        override protected def channelClass = classOf[EpollSocketChannel]
-        override protected def serverChannelClass = classOf[EpollServerSocketChannel]
+        override def channelClass = classOf[EpollSocketChannel]
+        override def serverChannelClass = classOf[EpollServerSocketChannel]
         override protected def group = new EpollEventLoopGroup()
     })
 
@@ -41,8 +41,8 @@ package object epoll {
       case e: Throwable => Failure(e)
     }).map(_ =>
       new Transport[EpollDomainSocketChannel] {
-        override protected def channelClass = classOf[EpollDomainSocketChannel]
-        override protected def serverChannelClass = classOf[EpollServerDomainSocketChannel]
+        override def channelClass = classOf[EpollDomainSocketChannel]
+        override def serverChannelClass = classOf[EpollServerDomainSocketChannel]
         override protected def group = new EpollEventLoopGroup(1) // one thread enough for the domain socket scenario.
     })
 

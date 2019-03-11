@@ -21,8 +21,8 @@ import io.netty.channel.socket.nio._
 
 package object jvm {
   implicit def jvm(implicit sys: ActorSystem): Transport[NioSocketChannel] = new Transport[NioSocketChannel] {
-    override protected def channelClass = classOf[NioSocketChannel]
-    override protected def serverChannelClass = classOf[NioServerSocketChannel]
+    override def channelClass = classOf[NioSocketChannel]
+    override def serverChannelClass = classOf[NioServerSocketChannel]
     override protected def group = new NioEventLoopGroup()
   }
 
