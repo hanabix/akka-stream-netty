@@ -45,3 +45,5 @@ Netty().bindAndHandle[SocketChannel](Flow[ByteString].map(identity), new InetSoc
     .flatMap(_ => sb.unbind())    
 }
 ```
+
+More usage information please see [test cases](./all/src/test/scala/zhongl/stream/netty/all).
