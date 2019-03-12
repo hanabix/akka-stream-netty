@@ -23,6 +23,7 @@ libraryDependencies += "com.github.zhongl.akka-stream-netty" %% "all" % <latest 
 # Usage
 
 ```scala
+import scala.concurrent.duration._
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl._
