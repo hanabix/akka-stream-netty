@@ -1,0 +1,1 @@
+Just new a issue or PR with the template, that's all ! ;)
