@@ -65,7 +65,7 @@ class ImplicitlySpec extends TestKit(ActorSystem("implicitly")) with AsyncWordSp
       val msg = ByteString("a")
       Source
         .single(msg)
-        .via(Netty().outgoingConnection[C](address))
+        .via(Netty().outgoingConnection[C](sb.localAddress))
         .runWith(Sink.head)
         .map(_ shouldBe msg)
         .flatMap(a => sb.unbind().map(_ => a))

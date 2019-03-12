@@ -23,6 +23,7 @@ libraryDependencies += "com.github.zhongl.akka-stream-netty" %% "all" % <latest 
 # Usage
 
 ```scala
+import java.net._
 import scala.concurrent.duration._
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
@@ -36,10 +37,10 @@ implicit val system = ActorSystem("demo")
 implicit val mat = ActorMaterializer()
 implicit val ec = system.dispatcher
 
-Netty().bindAndHandle[SocketChannel](Flow[ByteString].map(identity), address, halfClose = true).flatMap { sb =>
+Netty().bindAndHandle[SocketChannel](Flow[ByteString].map(identity), new InetSocketAddress("localhost", 8080)).flatMap { sb =>
   Source.repeat(ByteString("a"))
     .delay(1.seconds) 
-    .via(Netty().outgoingConnection[SocketChannel](address))
+    .via(Netty().outgoingConnection[SocketChannel](sb.localAddress))
     .runForeach(println)
     .flatMap(_ => sb.unbind())    
 }
