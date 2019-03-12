@@ -1,6 +1,12 @@
 # akka-stream-netty [![Build Status](https://travis-ci.org/zhongl/akka-stream-netty.svg?branch=master)](https://travis-ci.org/zhongl/akka-stream-netty) [![Version Badge](https://jitpack.io/v/zhongl/akka-stream-netty.svg)](https://jitpack.io/#zhongl/akka-stream-netty) [![Coveralls github](https://img.shields.io/coveralls/github/zhongl/akka-stream-netty.svg)](https://coveralls.io/github/zhongl/akka-stream-netty?branch=master)
 
-A scala lib to adapt [netty](https://netty.io) transport to [akka-stream](https://doc.akka.io/docs/akka/current/stream/index.html), which let us can use native transport with epoll or kqueue.
+A scala lib to adapt [netty](https://netty.io) transport to [akka-stream](https://doc.akka.io/docs/akka/current/stream/index.html), which let us can use native transport with:
+
+- epoll
+- kqueue
+- unix domain socket
+
+> [alpakka-unix-domain-socket](https://github.com/akka/alpakka) would be a alternative if you only want use unix domain socket.
 
 # Resolvers
 
