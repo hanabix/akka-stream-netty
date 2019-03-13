@@ -32,12 +32,7 @@ import scala.concurrent.duration.Duration
 
 abstract class Transport[+C <: DuplexChannel](implicit system: ActorSystem) {
 
-  def channelClass: Class[_ <: C]
-  def serverChannelClass: Class[_ <: ServerChannel]
-
-  protected def group: EventLoopGroup
-
-  private lazy val _group = {
+  private lazy val _group = { // ensure event group is initialized only once and could be shutdown gracefully
     val g = group
     CoordinatedShutdown(system).addJvmShutdownHook(g.shutdownGracefully())
     g
@@ -58,7 +53,7 @@ abstract class Transport[+C <: DuplexChannel](implicit system: ActorSystem) {
       )(Keep.both)
       .mapMaterializedValue {
         case (sinkQ, sourceQ) =>
-          val promise = Promise[OutgoingConnection]
+          val promise   = Promise[OutgoingConnection]
           val bootstrap = new Bootstrap()
 
           localAddress.foreach(bootstrap.localAddress)
@@ -91,8 +86,8 @@ abstract class Transport[+C <: DuplexChannel](implicit system: ActorSystem) {
 
   final def bind(
       localAddress: SocketAddress,
-      backlog: Int = 100,
-      halfClose: Boolean = false
+      backlog: Int,
+      halfClose: Boolean
   ): Source[IncomingConnection, Future[ServerBinding]] = {
 
     @inline def unbind(ch: Channel): () => Future[Unit] = { () =>
@@ -106,7 +101,7 @@ abstract class Transport[+C <: DuplexChannel](implicit system: ActorSystem) {
 
     implicit val mat = ActorMaterializer()
 
-    val p = Promise[ServerBinding]()
+    val p                      = Promise[ServerBinding]()
     val (incomingQ, incomingS) = Source.queue[IncomingConnection](1, OverflowStrategy.fail).preMaterialize()
 
     new ServerBootstrap()
@@ -118,7 +113,7 @@ abstract class Transport[+C <: DuplexChannel](implicit system: ActorSystem) {
       .childOption[java.lang.Boolean](ChannelOption.ALLOW_HALF_CLOSURE, halfClose)
       .childHandler(new ChannelInitializer[C] {
         override def initChannel(ch: C): Unit = {
-          val (sinkQ, sink) = Sink.queue[ByteString]().preMaterialize()
+          val (sinkQ, sink)     = Sink.queue[ByteString]().preMaterialize()
           val (sourceQ, source) = Source.queue[ByteString](1, OverflowStrategy.fail).preMaterialize()
 
           incomingQ.offer(IncomingConnection(ch.localAddress(), ch.remoteAddress(), Flow.fromSinkAndSource(sink, source)))
@@ -136,5 +131,11 @@ abstract class Transport[+C <: DuplexChannel](implicit system: ActorSystem) {
 
     incomingS.mapMaterializedValue(_ => p.future)
   }
+
+  private[netty] def channelClass: Class[_ <: C]
+
+  private[netty] def serverChannelClass: Class[_ <: ServerChannel]
+
+  protected def group: EventLoopGroup
 
 }

@@ -15,6 +15,7 @@
  */
 
 package zhongl.stream.netty
+
 import akka.actor.ActorSystem
 import io.netty.channel.epoll._
 
@@ -26,12 +27,13 @@ package object epoll {
     (try Success(Epoll.ensureAvailability())
     catch {
       case e: Throwable => Failure(e)
-    }).map(_ =>
+    }).map { _ =>
       new Transport[EpollSocketChannel] {
-        override def channelClass = classOf[EpollSocketChannel]
-        override def serverChannelClass = classOf[EpollServerSocketChannel]
-        override protected def group = new EpollEventLoopGroup()
-    })
+        override private[netty] def channelClass       = classOf[EpollSocketChannel]
+        override private[netty] def serverChannelClass = classOf[EpollServerSocketChannel]
+        override protected def group                   = new EpollEventLoopGroup()
+      }
+    }
 
   implicit def forceEpollSocketTransport(implicit system: ActorSystem): Transport[EpollSocketChannel] = tryEpollSocketTransport.get
 
@@ -39,12 +41,13 @@ package object epoll {
     (try Success(Epoll.ensureAvailability())
     catch {
       case e: Throwable => Failure(e)
-    }).map(_ =>
+    }).map { _ =>
       new Transport[EpollDomainSocketChannel] {
-        override def channelClass = classOf[EpollDomainSocketChannel]
-        override def serverChannelClass = classOf[EpollServerDomainSocketChannel]
-        override protected def group = new EpollEventLoopGroup(1) // one thread enough for the domain socket scenario.
-    })
+        override private[netty] def channelClass       = classOf[EpollDomainSocketChannel]
+        override private[netty] def serverChannelClass = classOf[EpollServerDomainSocketChannel]
+        override protected def group                   = new EpollEventLoopGroup(1) // one thread enough for the domain socket scenario.
+      }
+    }
 
   implicit def forceEpollDomainTransport(implicit system: ActorSystem): Transport[EpollDomainSocketChannel] = tryEpollDomainTransport.get
 

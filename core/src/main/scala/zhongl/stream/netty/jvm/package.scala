@@ -13,17 +13,17 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
 package zhongl.stream.netty
+
 import akka.actor.ActorSystem
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio._
 
 package object jvm {
   implicit def jvm(implicit sys: ActorSystem): Transport[NioSocketChannel] = new Transport[NioSocketChannel] {
-    override def channelClass = classOf[NioSocketChannel]
-    override def serverChannelClass = classOf[NioServerSocketChannel]
-    override protected def group = new NioEventLoopGroup()
+    override private[netty] def channelClass       = classOf[NioSocketChannel]
+    override private[netty] def serverChannelClass = classOf[NioServerSocketChannel]
+    override protected def group                   = new NioEventLoopGroup()
   }
 
 }

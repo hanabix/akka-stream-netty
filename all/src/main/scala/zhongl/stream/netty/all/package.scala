@@ -43,11 +43,9 @@ package object all {
   }
 
   implicit def domainTransport(implicit system: ActorSystem): Transport[DomainSocketChannel] = {
-    implicitly[Try[Transport[EpollDomainSocketChannel]]]
-      .recoverWith {
-        case _: UnsatisfiedLinkError => implicitly[Try[Transport[KQueueDomainSocketChannel]]]
-      }
-      .get
+    implicitly[Try[Transport[EpollDomainSocketChannel]]].recoverWith {
+      case _: UnsatisfiedLinkError => implicitly[Try[Transport[KQueueDomainSocketChannel]]]
+    }.get
   }
 
 }

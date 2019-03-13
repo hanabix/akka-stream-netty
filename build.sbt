@@ -5,6 +5,7 @@ def commonSettings(module: String) = Seq(
   organization := "com.github.zhongl.akka-stream-netty",
   version := "0.0.1",
   scalaVersion := "2.12.8",
+  scalafmtOnCompile := true,
   scalacOptions ++= Seq(
     "-deprecation",
     "-encoding",

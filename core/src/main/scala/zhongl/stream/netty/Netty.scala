@@ -29,13 +29,13 @@ import scala.concurrent.Future
 import scala.concurrent.duration.Duration
 
 /**
-  *
+  * As a extension of [[ActorSystem]], [[Netty]] provide some duplex network transport base on native lib.
   */
 object Netty extends ExtensionId[Netty] with ExtensionIdProvider {
   def apply()(implicit system: ActorSystem): Netty = super.apply(system)
 
   override def createExtension(system: ExtendedActorSystem): Netty = new Netty(system)
-  override def lookup(): ExtensionId[_ <: Extension] = Netty
+  override def lookup(): ExtensionId[_ <: Extension]               = Netty
 
   final case class OutgoingConnection(localAddress: SocketAddress, remoteAddress: SocketAddress)
   final case class IncomingConnection(localAddress: SocketAddress, remoteAddress: SocketAddress, flow: Flow[ByteString, ByteString, NotUsed])
@@ -47,6 +47,7 @@ object Netty extends ExtensionId[Netty] with ExtensionIdProvider {
 class Netty(system: ExtendedActorSystem) extends Extension {
   import Netty._
 
+  /** Bind to a local address to accept incoming connection from a client. */
   def bind[C <: DuplexChannel](
       localAddress: SocketAddress,
       backlog: Int = 100,
@@ -55,6 +56,7 @@ class Netty(system: ExtendedActorSystem) extends Extension {
     t.bind(localAddress, backlog, halfClose)
   }
 
+  /** Bind to a local address to accept incoming connection handling with a [[Flow]]. */
   def bindAndHandle[C <: DuplexChannel](
       flow: Flow[ByteString, ByteString, _],
       localAddress: SocketAddress,
@@ -64,6 +66,7 @@ class Netty(system: ExtendedActorSystem) extends Extension {
     bind(localAddress, backlog, halfClose).to(Sink.foreach(_.flow.join(flow).run())).run()
   }
 
+  /** Connect to a remote address. */
   def outgoingConnection[C <: DuplexChannel](
       remoteAddress: SocketAddress,
       localAddress: Option[SocketAddress] = None,
