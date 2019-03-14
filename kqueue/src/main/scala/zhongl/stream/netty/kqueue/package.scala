@@ -22,14 +22,14 @@ import io.netty.channel.kqueue._
 package object kqueue {
   private def mayBe[C <: AbstractKQueueStreamChannel](t: Transport[C]): Option[Transport[C]] = if (KQueue.isAvailable) Some(t) else None
 
-  implicit def mayBeSocketTransport(implicit system: ActorSystem): Option[Transport[KQueueSocketChannel]] =
+  implicit def kqueueSocketTransport(implicit system: ActorSystem): Option[Transport[KQueueSocketChannel]] =
     mayBe(new Transport[KQueueSocketChannel] {
       override private[netty] def channelClass       = classOf[KQueueSocketChannel]
       override private[netty] def serverChannelClass = classOf[KQueueServerSocketChannel]
       override protected def group                   = new KQueueEventLoopGroup()
     })
 
-  implicit def mayBeDomainTransport(implicit system: ActorSystem): Option[Transport[KQueueDomainSocketChannel]] =
+  implicit def kqueueDomainTransport(implicit system: ActorSystem): Option[Transport[KQueueDomainSocketChannel]] =
     mayBe(new Transport[KQueueDomainSocketChannel] {
       override private[netty] def channelClass       = classOf[KQueueDomainSocketChannel]
       override private[netty] def serverChannelClass = classOf[KQueueServerDomainSocketChannel]

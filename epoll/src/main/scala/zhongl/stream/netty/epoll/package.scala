@@ -23,14 +23,14 @@ package object epoll {
 
   private def mayBe[C <: AbstractEpollStreamChannel](t: Transport[C]): Option[Transport[C]] = if (Epoll.isAvailable) Some(t) else None
 
-  implicit def mayBeSocketTransport(implicit system: ActorSystem): Option[Transport[EpollSocketChannel]] =
+  implicit def epollSocketTransport(implicit system: ActorSystem): Option[Transport[EpollSocketChannel]] =
     mayBe(new Transport[EpollSocketChannel] {
       override private[netty] def channelClass       = classOf[EpollSocketChannel]
       override private[netty] def serverChannelClass = classOf[EpollServerSocketChannel]
       override protected def group                   = new EpollEventLoopGroup()
     })
 
-  implicit def mayBeDomainTransport(implicit system: ActorSystem): Option[Transport[EpollDomainSocketChannel]] =
+  implicit def epollDomainTransport(implicit system: ActorSystem): Option[Transport[EpollDomainSocketChannel]] =
     mayBe(new Transport[EpollDomainSocketChannel] {
       override private[netty] def channelClass       = classOf[EpollDomainSocketChannel]
       override private[netty] def serverChannelClass = classOf[EpollServerDomainSocketChannel]
