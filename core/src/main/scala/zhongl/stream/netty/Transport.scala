@@ -26,11 +26,21 @@ import io.netty.bootstrap._
 import io.netty.channel._
 import io.netty.channel.socket.DuplexChannel
 import Netty._
+import akka.dispatch.Futures
 
 import scala.concurrent.{Channel => _, _}
 import scala.concurrent.duration.Duration
 
 abstract class Transport[+C <: DuplexChannel](implicit system: ActorSystem) {
+
+  implicit private val ex = system.dispatcher
+  implicit private val asFuture: ChannelFuture => Future[Channel] = { cf =>
+    val p = Futures.promise[Channel]()
+    cf.addListener({ f: ChannelFuture =>
+      if (f.isSuccess) p.trySuccess(f.channel()) else p.tryFailure(f.cause())
+    })
+    p.future
+  }
 
   private lazy val _group = { // ensure event group is initialized only once and could be shutdown gracefully
     val g = group
@@ -53,7 +63,6 @@ abstract class Transport[+C <: DuplexChannel](implicit system: ActorSystem) {
       )(Keep.both)
       .mapMaterializedValue {
         case (sinkQ, sourceQ) =>
-          val promise   = Promise[OutgoingConnection]
           val bootstrap = new Bootstrap()
 
           localAddress.foreach(bootstrap.localAddress)
@@ -73,14 +82,7 @@ abstract class Transport[+C <: DuplexChannel](implicit system: ActorSystem) {
               }
             })
             .connect(remoteAddress)
-            .addListener { future: ChannelFuture =>
-              if (future.isSuccess) {
-                val channel = future.channel()
-                promise.trySuccess(OutgoingConnection(channel.localAddress(), channel.remoteAddress()))
-              } else promise.tryFailure(future.cause())
-            }
-
-          promise.future
+            .map(ch => OutgoingConnection(ch.localAddress(), ch.remoteAddress()))
       }
   }
 
@@ -90,21 +92,11 @@ abstract class Transport[+C <: DuplexChannel](implicit system: ActorSystem) {
       halfClose: Boolean
   ): Source[IncomingConnection, Future[ServerBinding]] = {
 
-    @inline def unbind(ch: Channel): () => Future[Unit] = { () =>
-      val p = Promise[Unit]()
-      ch.close()
-        .addListener({ f: ChannelFuture =>
-          if (f.isSuccess) p.trySuccess(Unit) else p.tryFailure(f.cause())
-        })
-      p.future
-    }
-
     implicit val mat = ActorMaterializer()
 
-    val p                      = Promise[ServerBinding]()
     val (incomingQ, incomingS) = Source.queue[IncomingConnection](1, OverflowStrategy.fail).preMaterialize()
 
-    new ServerBootstrap()
+    val f = new ServerBootstrap()
       .group(_group)
       .channel(serverChannelClass)
       .option[Integer](ChannelOption.SO_BACKLOG, backlog)
@@ -124,12 +116,9 @@ abstract class Transport[+C <: DuplexChannel](implicit system: ActorSystem) {
         }
       })
       .bind(localAddress)
-      .addListener({ f: ChannelFuture =>
-        if (f.isSuccess) p.trySuccess(ServerBinding(f.channel().localAddress())(unbind(f.channel())))
-        else p.tryFailure(f.cause())
-      })
+      .map(ch => ServerBinding(ch.localAddress())(() => ch.close().map(_ => {})))
 
-    incomingS.mapMaterializedValue(_ => p.future)
+    incomingS.mapMaterializedValue(_ => f)
   }
 
   private[netty] def channelClass: Class[_ <: C]
