@@ -48,31 +48,31 @@ class Netty(system: ExtendedActorSystem) extends Extension {
   import Netty._
 
   /** Bind to a local address to accept incoming connection from a client. */
-  def bind[C <: DuplexChannel](
+  def bind[C <: DuplexChannel: Transport](
       localAddress: SocketAddress,
       backlog: Int = 100,
       halfClose: Boolean = false
-  )(implicit t: Transport[C]): Source[IncomingConnection, Future[ServerBinding]] = {
-    t.bind(localAddress, backlog, halfClose)
+  ): Source[IncomingConnection, Future[ServerBinding]] = {
+    implicitly[Transport[C]].bind(localAddress, backlog, halfClose)
   }
 
   /** Bind to a local address to accept incoming connection handling with a [[Flow]]. */
-  def bindAndHandle[C <: DuplexChannel](
+  def bindAndHandle[C <: DuplexChannel: Transport](
       flow: Flow[ByteString, ByteString, _],
       localAddress: SocketAddress,
       backlog: Int = 100,
       halfClose: Boolean = false
-  )(implicit t: Transport[C], mat: Materializer): Future[ServerBinding] = {
+  )(implicit mat: Materializer): Future[ServerBinding] = {
     bind(localAddress, backlog, halfClose).to(Sink.foreach(_.flow.join(flow).run())).run()
   }
 
   /** Connect to a remote address. */
-  def outgoingConnection[C <: DuplexChannel](
+  def outgoingConnection[C <: DuplexChannel: Transport](
       remoteAddress: SocketAddress,
       localAddress: Option[SocketAddress] = None,
       halfClose: Boolean = true,
       connectTimeout: Duration = Duration.Inf
-  )(implicit t: Transport[C]): Flow[ByteString, ByteString, Future[OutgoingConnection]] = {
-    t.outgoingConnection(remoteAddress, localAddress, halfClose, connectTimeout)
+  ): Flow[ByteString, ByteString, Future[OutgoingConnection]] = {
+    implicitly[Transport[C]].outgoingConnection(remoteAddress, localAddress, halfClose, connectTimeout)
   }
 }
