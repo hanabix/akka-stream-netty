@@ -19,7 +19,7 @@ import zhongl.stream.netty._
 class ImplicitlySpec extends TestKit(ActorSystem("implicitly")) with AsyncWordSpecLike with Matchers with BeforeAndAfterAll {
 
   implicit val mat = ActorMaterializer()
-  implicit val ec = system.dispatcher
+  implicit val ec  = system.dispatcher
 
   "import all._" should {
 
@@ -43,7 +43,7 @@ class ImplicitlySpec extends TestKit(ActorSystem("implicitly")) with AsyncWordSp
       } else if (Epoll.isAvailable) {
         cc shouldBe classOf[EpollDomainSocketChannel]
       } else {
-        fail(intercept[UnsatisfiedLinkError](cc))
+        assertThrows[IllegalStateException](cc)
       }
     }
 
