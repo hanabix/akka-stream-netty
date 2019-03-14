@@ -7,10 +7,10 @@ jdk:
   - openjdk8
 
 script:
-  - sbt clean coverage test coverageReport && sbt coverageAggregate
+  - sbt coverage test coverageReport coverageAggregate
 
 after_success:
-  - sbt coveralls
+  - sbt coveralls codacyCoverage
 
 notifications:
   email:

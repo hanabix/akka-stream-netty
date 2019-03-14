@@ -36,6 +36,7 @@ class AkkaStreamChannelHandler[In, Out](sourceQ: SourceQueueWithComplete[In], si
     ExecutionContexts.fromExecutorService(ctx.executor())
   }
 
+  /** Thread safe was guaranteed by [[EventLoopGroup]] */
   private var sinkCompleted = false
 
   override def channelActive(ctx: ChannelHandlerContext): Unit = {

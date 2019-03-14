@@ -2,9 +2,9 @@
 
 A scala lib to adapt [netty](https://netty.io) transport to [akka-stream](https://doc.akka.io/docs/akka/current/stream/index.html), which let us can use native transport with:
 
-- epoll
-- kqueue
-- unix domain socket
+  - epoll
+  - kqueue
+  - unix domain socket
 
 > [alpakka-unix-domain-socket](https://github.com/akka/alpakka) would be a alternative if you only want use unix domain socket.
 

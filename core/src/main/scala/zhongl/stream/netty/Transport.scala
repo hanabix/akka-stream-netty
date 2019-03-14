@@ -42,7 +42,7 @@ abstract class Transport[+C <: DuplexChannel](implicit system: ActorSystem) {
     p.future
   }
 
-  private lazy val _group = { // ensure event group is initialized only once and could be shutdown gracefully
+  private lazy val lazyGroup = { // ensure event group is initialized only once and could be shutdown gracefully
     val g = group
     CoordinatedShutdown(system).addJvmShutdownHook(g.shutdownGracefully())
     g
@@ -68,7 +68,7 @@ abstract class Transport[+C <: DuplexChannel](implicit system: ActorSystem) {
           localAddress.foreach(bootstrap.localAddress)
 
           bootstrap
-            .group(_group)
+            .group(lazyGroup)
             .channel(channelClass)
             // disable auto read to enable back-pressure of stream.
             .option[java.lang.Boolean](ChannelOption.AUTO_READ, false)
@@ -97,7 +97,7 @@ abstract class Transport[+C <: DuplexChannel](implicit system: ActorSystem) {
     val (incomingQ, incomingS) = Source.queue[IncomingConnection](1, OverflowStrategy.fail).preMaterialize()
 
     val f = new ServerBootstrap()
-      .group(_group)
+      .group(lazyGroup)
       .channel(serverChannelClass)
       .option[Integer](ChannelOption.SO_BACKLOG, backlog)
       // disable auto read to enable back-pressure of stream.

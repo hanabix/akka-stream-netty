@@ -39,7 +39,7 @@ object Netty extends ExtensionId[Netty] with ExtensionIdProvider {
 
   final case class OutgoingConnection(localAddress: SocketAddress, remoteAddress: SocketAddress)
   final case class IncomingConnection(localAddress: SocketAddress, remoteAddress: SocketAddress, flow: Flow[ByteString, ByteString, NotUsed])
-  final case class ServerBinding(localAddress: SocketAddress)(private val unbindAction: () ⇒ Future[Unit]) {
+  final case class ServerBinding(localAddress: SocketAddress)(private val unbindAction: () => Future[Unit]) {
     def unbind(): Future[Unit] = unbindAction()
   }
 }
