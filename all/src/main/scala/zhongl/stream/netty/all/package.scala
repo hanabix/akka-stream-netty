@@ -23,8 +23,6 @@ import io.netty.channel.socket._
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.channel.unix.DomainSocketChannel
 
-import scala.util.Try
-
 package object all {
 
   import epoll._
@@ -32,20 +30,15 @@ package object all {
   import kqueue._
 
   implicit def socketTransport(implicit system: ActorSystem): Transport[SocketChannel] = {
-    implicitly[Try[Transport[EpollSocketChannel]]]
-      .recoverWith {
-        case _: UnsatisfiedLinkError => implicitly[Try[Transport[KQueueSocketChannel]]]
-      }
-      .recover {
-        case _: UnsatisfiedLinkError => implicitly[Transport[NioSocketChannel]]
-      }
-      .get
+    implicitly[Option[Transport[EpollSocketChannel]]]
+      .orElse(implicitly[Option[Transport[KQueueSocketChannel]]])
+      .getOrElse(implicitly[Transport[NioSocketChannel]])
   }
 
   implicit def domainTransport(implicit system: ActorSystem): Transport[DomainSocketChannel] = {
-    implicitly[Try[Transport[EpollDomainSocketChannel]]].recoverWith {
-      case _: UnsatisfiedLinkError => implicitly[Try[Transport[KQueueDomainSocketChannel]]]
-    }.get
+    implicitly[Option[Transport[EpollDomainSocketChannel]]]
+      .orElse(implicitly[Option[Transport[KQueueDomainSocketChannel]]])
+      .getOrElse(throw new IllegalStateException("Your environment do not support Unix domain socket"))
   }
 
 }

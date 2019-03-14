@@ -19,36 +19,22 @@ package zhongl.stream.netty
 import akka.actor.ActorSystem
 import io.netty.channel.epoll._
 
-import scala.util._
-
 package object epoll {
 
-  implicit def tryEpollSocketTransport(implicit system: ActorSystem): Try[Transport[EpollSocketChannel]] =
-    (try Success(Epoll.ensureAvailability())
-    catch {
-      case e: Throwable => Failure(e)
-    }).map { _ =>
-      new Transport[EpollSocketChannel] {
-        override private[netty] def channelClass       = classOf[EpollSocketChannel]
-        override private[netty] def serverChannelClass = classOf[EpollServerSocketChannel]
-        override protected def group                   = new EpollEventLoopGroup()
-      }
-    }
+  private def mayBe[C <: AbstractEpollStreamChannel](t: Transport[C]): Option[Transport[C]] = if (Epoll.isAvailable) Some(t) else None
 
-  implicit def forceEpollSocketTransport(implicit system: ActorSystem): Transport[EpollSocketChannel] = tryEpollSocketTransport.get
+  implicit def mayBeSocketTransport(implicit system: ActorSystem): Option[Transport[EpollSocketChannel]] =
+    mayBe(new Transport[EpollSocketChannel] {
+      override private[netty] def channelClass       = classOf[EpollSocketChannel]
+      override private[netty] def serverChannelClass = classOf[EpollServerSocketChannel]
+      override protected def group                   = new EpollEventLoopGroup()
+    })
 
-  implicit def tryEpollDomainTransport(implicit system: ActorSystem): Try[Transport[EpollDomainSocketChannel]] =
-    (try Success(Epoll.ensureAvailability())
-    catch {
-      case e: Throwable => Failure(e)
-    }).map { _ =>
-      new Transport[EpollDomainSocketChannel] {
-        override private[netty] def channelClass       = classOf[EpollDomainSocketChannel]
-        override private[netty] def serverChannelClass = classOf[EpollServerDomainSocketChannel]
-        override protected def group                   = new EpollEventLoopGroup(1) // one thread enough for the domain socket scenario.
-      }
-    }
-
-  implicit def forceEpollDomainTransport(implicit system: ActorSystem): Transport[EpollDomainSocketChannel] = tryEpollDomainTransport.get
+  implicit def mayBeDomainTransport(implicit system: ActorSystem): Option[Transport[EpollDomainSocketChannel]] =
+    mayBe(new Transport[EpollDomainSocketChannel] {
+      override private[netty] def channelClass       = classOf[EpollDomainSocketChannel]
+      override private[netty] def serverChannelClass = classOf[EpollServerDomainSocketChannel]
+      override protected def group                   = new EpollEventLoopGroup(1) // one thread enough for the domain socket scenario.
+    })
 
 }

@@ -19,35 +19,21 @@ package zhongl.stream.netty
 import akka.actor.ActorSystem
 import io.netty.channel.kqueue._
 
-import scala.util._
-
 package object kqueue {
-  implicit def tryKQueueSocketTransport(implicit system: ActorSystem): Try[Transport[KQueueSocketChannel]] =
-    (try Success(KQueue.ensureAvailability())
-    catch {
-      case e: Throwable => Failure(e)
-    }).map { _ =>
-      new Transport[KQueueSocketChannel] {
-        override private[netty] def channelClass       = classOf[KQueueSocketChannel]
-        override private[netty] def serverChannelClass = classOf[KQueueServerSocketChannel]
-        override protected def group                   = new KQueueEventLoopGroup()
-      }
-    }
+  private def mayBe[C <: AbstractKQueueStreamChannel](t: Transport[C]): Option[Transport[C]] = if (KQueue.isAvailable) Some(t) else None
 
-  implicit def forceKQueueSocketTransport(implicit system: ActorSystem): Transport[KQueueSocketChannel] = tryKQueueSocketTransport.get
+  implicit def mayBeSocketTransport(implicit system: ActorSystem): Option[Transport[KQueueSocketChannel]] =
+    mayBe(new Transport[KQueueSocketChannel] {
+      override private[netty] def channelClass       = classOf[KQueueSocketChannel]
+      override private[netty] def serverChannelClass = classOf[KQueueServerSocketChannel]
+      override protected def group                   = new KQueueEventLoopGroup()
+    })
 
-  implicit def tryKQueueDomainTransport(implicit system: ActorSystem): Try[Transport[KQueueDomainSocketChannel]] =
-    (try Success(KQueue.ensureAvailability())
-    catch {
-      case e: Throwable => Failure(e)
-    }).map { _ =>
-      new Transport[KQueueDomainSocketChannel] {
-        override private[netty] def channelClass       = classOf[KQueueDomainSocketChannel]
-        override private[netty] def serverChannelClass = classOf[KQueueServerDomainSocketChannel]
-        override protected def group                   = new KQueueEventLoopGroup(1) // one thread enough for the domain socket scenario.
-      }
-    }
-
-  implicit def forceKQueueDomainTransport(implicit system: ActorSystem): Transport[KQueueDomainSocketChannel] = tryKQueueDomainTransport.get
+  implicit def mayBeDomainTransport(implicit system: ActorSystem): Option[Transport[KQueueDomainSocketChannel]] =
+    mayBe(new Transport[KQueueDomainSocketChannel] {
+      override private[netty] def channelClass       = classOf[KQueueDomainSocketChannel]
+      override private[netty] def serverChannelClass = classOf[KQueueServerDomainSocketChannel]
+      override protected def group                   = new KQueueEventLoopGroup(1) // one thread enough for the domain socket scenario.
+    })
 
 }
