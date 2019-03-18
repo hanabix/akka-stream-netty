@@ -6,7 +6,7 @@ A scala lib to adapt [netty](https://netty.io) transport to [akka-stream](https:
   - kqueue
   - unix domain socket
 
-> [alpakka-unix-domain-socket](https://github.com/akka/alpakka) would be a alternative if you only want use unix domain socket.
+> [alpakka-unix-domain-socket](https://github.com/akka/alpakka) would be a alternative if you only want to use unix domain socket.
 
 # Resolvers
 
