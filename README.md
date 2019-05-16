@@ -29,7 +29,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl._
 import akka.util.ByteString
-import io.netty.channel.socket.SocketChannel
+import io.netty.channel.socket._
 import zhongl.stream.netty._
 import all._
 
@@ -37,7 +37,7 @@ implicit val system = ActorSystem("demo")
 implicit val mat = ActorMaterializer()
 implicit val ec = system.dispatcher
 
-Netty().bindAndHandle[SocketChannel](Flow[ByteString].map(identity), new InetSocketAddress("localhost", 8080)).flatMap { sb =>
+Netty().bindAndHandle[ServerSocketChannel](Flow[ByteString].map(identity), new InetSocketAddress("localhost", 8080)).flatMap { sb =>
   Source.repeat(ByteString("a"))
     .delay(1.seconds) 
     .via(Netty().outgoingConnection[SocketChannel](sb.localAddress))
