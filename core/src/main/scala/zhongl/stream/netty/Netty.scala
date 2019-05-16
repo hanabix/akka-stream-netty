@@ -19,10 +19,12 @@ package zhongl.stream.netty
 import java.net.SocketAddress
 
 import akka.NotUsed
-import akka.actor.{ActorSystem, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider}
-import akka.stream.Materializer
-import akka.stream.scaladsl.{Flow, Sink, Source}
+import akka.actor.{ActorSystem, CoordinatedShutdown, ExtendedActorSystem, Extension, ExtensionId, ExtensionIdProvider}
+import akka.dispatch.Futures
+import akka.stream._
+import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import akka.util.ByteString
+import io.netty.channel._
 import io.netty.channel.socket.DuplexChannel
 
 import scala.concurrent.Future
@@ -47,17 +49,49 @@ object Netty extends ExtensionId[Netty] with ExtensionIdProvider {
 class Netty(system: ExtendedActorSystem) extends Extension {
   import Netty._
 
+  implicit private val ex = system.dispatcher
+
+  implicit private val asFuture: ChannelFuture => Future[Channel] = { cf =>
+    val p = Futures.promise[Channel]()
+    cf.addListener({ f: ChannelFuture =>
+      if (f.isSuccess) p.trySuccess(f.channel()) else p.tryFailure(f.cause())
+    })
+    p.future
+  }
+
   /** Bind to a local address to accept incoming connection from a client. */
-  def bind[C <: DuplexChannel: Transport](
+  def bind[C <: ServerChannel: Transport](
       localAddress: SocketAddress,
       backlog: Int = 100,
       halfClose: Boolean = false
   ): Source[IncomingConnection, Future[ServerBinding]] = {
-    implicitly[Transport[C]].bind(localAddress, backlog, halfClose)
+
+    implicit val mat = ActorMaterializer()(system)
+
+    CoordinatedShutdown(system).addJvmShutdownHook(Transport[C].group.shutdownGracefully())
+
+    val (incomingQ, incomingS) = Source.queue[IncomingConnection](1, OverflowStrategy.fail).preMaterialize()
+
+    val handler = new ChannelInitializer[Channel] {
+      override def initChannel(ch: Channel): Unit = {
+        val (sinkQ, sink)     = Sink.queue[ByteString]().preMaterialize()
+        val (sourceQ, source) = Source.queue[ByteString](1, OverflowStrategy.fail).preMaterialize()
+
+        incomingQ.offer(IncomingConnection(ch.localAddress(), ch.remoteAddress(), Flow.fromSinkAndSource(sink, source)))
+
+        ch.pipeline()
+          .addLast(new ByteToByteStringCodec)
+          .addLast(new AkkaStreamChannelHandler(sourceQ, sinkQ)(system.log))
+      }
+    }
+
+    val f = bootstrap(Transport[C], handler, localAddress, backlog, halfClose)
+
+    incomingS.mapMaterializedValue(_ => f.map(ch => ServerBinding(ch.localAddress())(() => ch.close().map(_ => {}))))
   }
 
   /** Bind to a local address to accept incoming connection handling with a [[Flow]]. */
-  def bindAndHandle[C <: DuplexChannel: Transport](
+  def bindAndHandle[C <: ServerChannel: Transport](
       flow: Flow[ByteString, ByteString, _],
       localAddress: SocketAddress,
       backlog: Int = 100,
@@ -73,6 +107,29 @@ class Netty(system: ExtendedActorSystem) extends Extension {
       halfClose: Boolean = true,
       connectTimeout: Duration = Duration.Inf
   ): Flow[ByteString, ByteString, Future[OutgoingConnection]] = {
-    implicitly[Transport[C]].outgoingConnection(remoteAddress, localAddress, halfClose, connectTimeout)
+
+    CoordinatedShutdown(system).addJvmShutdownHook(Transport[C].group.shutdownGracefully())
+
+    Flow
+      .fromSinkAndSourceMat(
+        Sink.queue[ByteString](),
+        Source.queue[ByteString](1, OverflowStrategy.fail)
+      )(Keep.both)
+      .mapMaterializedValue {
+        case (sinkQ, sourceQ) =>
+          val handler = new ChannelInitializer[C] {
+            override def initChannel(ch: C): Unit = {
+              ch.pipeline()
+                .addLast(new ByteToByteStringCodec)
+                .addLast(new AkkaStreamChannelHandler(sourceQ, sinkQ)(system.log))
+            }
+          }
+
+          bootstrap(Transport[C], handler, remoteAddress, localAddress, halfClose, connectTimeout)
+            .map(ch => OutgoingConnection(ch.localAddress(), ch.remoteAddress()))
+      }
+
   }
+
+  private def bootstrap(magnet: BootstrapMagnet): ChannelFuture = magnet()
 }

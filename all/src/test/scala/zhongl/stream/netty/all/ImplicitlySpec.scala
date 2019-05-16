@@ -8,6 +8,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.testkit.TestKit
 import akka.util.ByteString
+import io.netty.channel.ServerChannel
 import io.netty.channel.epoll._
 import io.netty.channel.kqueue._
 import io.netty.channel.socket._
@@ -24,7 +25,7 @@ class ImplicitlySpec extends TestKit(ActorSystem("implicitly")) with AsyncWordSp
   "import all._" should {
 
     "get platform-specified socket transport" in {
-      def cc = implicitly[Transport[SocketChannel]].channelClass
+      def cc = Transport[SocketChannel].channel
 
       if (KQueue.isAvailable) {
         cc shouldBe classOf[KQueueSocketChannel]
@@ -36,7 +37,7 @@ class ImplicitlySpec extends TestKit(ActorSystem("implicitly")) with AsyncWordSp
     }
 
     "get platform-specified domain socket transport" in {
-      def cc = implicitly[Transport[DomainSocketChannel]].channelClass
+      def cc = Transport[DomainSocketChannel].channel
 
       if (KQueue.isAvailable) {
         cc shouldBe classOf[KQueueDomainSocketChannel]
@@ -48,7 +49,7 @@ class ImplicitlySpec extends TestKit(ActorSystem("implicitly")) with AsyncWordSp
     }
 
     "adapt akka stream by socket channel" in {
-      runEcho[SocketChannel](new InetSocketAddress("localhost", 8080))
+      runEcho[SocketChannel, ServerSocketChannel](new InetSocketAddress("localhost", 8080))
     }
 
     "adapt akka stream by domain socket channel" in {
@@ -56,12 +57,12 @@ class ImplicitlySpec extends TestKit(ActorSystem("implicitly")) with AsyncWordSp
       file.delete()
       file.deleteOnExit()
 
-      runEcho[DomainSocketChannel](new DomainSocketAddress(file))
+      runEcho[DomainSocketChannel, ServerDomainSocketChannel](new DomainSocketAddress(file))
     }
   }
 
-  private def runEcho[C <: DuplexChannel](address: SocketAddress)(implicit t: Transport[C]) = {
-    Netty().bindAndHandle[C](Flow[ByteString].map(identity), address).flatMap { sb =>
+  private def runEcho[C <: DuplexChannel, S <: ServerChannel](address: SocketAddress)(implicit t: Transport[C], s: Transport[S]) = {
+    Netty().bindAndHandle[S](Flow[ByteString].map(identity), address).flatMap { sb =>
       val msg = ByteString("a")
       Source
         .single(msg)
