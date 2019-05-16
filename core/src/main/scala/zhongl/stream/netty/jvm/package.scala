@@ -15,15 +15,21 @@
  */
 package zhongl.stream.netty
 
-import akka.actor.ActorSystem
+import io.netty.channel._
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio._
 
 package object jvm {
-  implicit def jvm(implicit sys: ActorSystem): Transport[NioSocketChannel] = new Transport[NioSocketChannel] {
-    override private[netty] def channelClass       = classOf[NioSocketChannel]
-    override private[netty] def serverChannelClass = classOf[NioServerSocketChannel]
-    override protected def group                   = new NioEventLoopGroup()
+
+  trait NioTransport[C <: Channel] extends Transport[C] {
+    override def group: EventLoopGroup = new NioEventLoopGroup()
   }
 
+  implicit val nioSocketChannelT: Transport[NioSocketChannel] = new NioTransport[NioSocketChannel] {
+    override def channel = classOf[NioSocketChannel]
+  }
+
+  implicit val nioServerSocketChannelT: Transport[NioServerSocketChannel] = new NioTransport[NioServerSocketChannel] {
+    override def channel = classOf[NioServerSocketChannel]
+  }
 }

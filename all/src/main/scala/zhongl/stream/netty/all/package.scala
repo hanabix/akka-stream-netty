@@ -16,29 +16,30 @@
 
 package zhongl.stream.netty
 
-import akka.actor.ActorSystem
-import io.netty.channel.epoll._
-import io.netty.channel.kqueue._
+import io.netty.channel.Channel
 import io.netty.channel.socket._
-import io.netty.channel.socket.nio.NioSocketChannel
-import io.netty.channel.unix.DomainSocketChannel
+import io.netty.channel.unix.{DomainSocketChannel, ServerDomainSocketChannel}
+
+import scala.reflect.ClassTag
 
 package object all {
 
-  import epoll._
-  import jvm._
-  import kqueue._
+  implicit val socketChannel: Transport[SocketChannel]                         = findAvailable[SocketTransports, SocketChannel]
+  implicit val serverSocketChannel: Transport[ServerSocketChannel]             = findAvailable[SocketTransports, ServerSocketChannel]
+  implicit val domainSocketChannel: Transport[DomainSocketChannel]             = findAvailable[DomainSocketTransports, DomainSocketChannel]
+  implicit val serverDomainSocketChannel: Transport[ServerDomainSocketChannel] = findAvailable[DomainSocketTransports, ServerDomainSocketChannel]
 
-  implicit def socketTransport(implicit system: ActorSystem): Transport[SocketChannel] = {
-    implicitly[Option[Transport[EpollSocketChannel]]]
-      .orElse(implicitly[Option[Transport[KQueueSocketChannel]]])
-      .getOrElse(implicitly[Transport[NioSocketChannel]])
-  }
+  implicit private def socketSeq: Seq[SocketTransports]             = Seq(EpollTransports, KQueueTransports, NioTransports)
+  implicit private def domainSocketSeq: Seq[DomainSocketTransports] = Seq(EpollTransports, KQueueTransports)
 
-  implicit def domainTransport(implicit system: ActorSystem): Transport[DomainSocketChannel] = {
-    implicitly[Option[Transport[EpollDomainSocketChannel]]]
-      .orElse(implicitly[Option[Transport[KQueueDomainSocketChannel]]])
-      .getOrElse(throw new IllegalStateException("Your environment do not support Unix domain socket"))
+  private def findAvailable[T <: Transports, C <: Channel](
+      implicit s: Seq[T],
+      c: ClassTag[C],
+      g: GetTransport[T, C]
+  ): Transport[C] = {
+    s.find(_.available).map(g(_)).getOrElse {
+      throw new IllegalStateException(s"${c.runtimeClass.getName} is unavailable in your environment")
+    }
   }
 
 }

@@ -16,24 +16,33 @@
 
 package zhongl.stream.netty
 
-import akka.actor.ActorSystem
 import io.netty.channel.kqueue._
+import io.netty.channel._
 
 package object kqueue {
-  private def mayBe[C <: AbstractKQueueStreamChannel](t: Transport[C]): Option[Transport[C]] = if (KQueue.isAvailable) Some(t) else None
+  trait KQueueTransport[C <: Channel] extends Transport[C] {
+    override def group: EventLoopGroup = new KQueueEventLoopGroup()
+  }
 
-  implicit def kqueueSocketTransport(implicit system: ActorSystem): Option[Transport[KQueueSocketChannel]] =
-    mayBe(new Transport[KQueueSocketChannel] {
-      override private[netty] def channelClass       = classOf[KQueueSocketChannel]
-      override private[netty] def serverChannelClass = classOf[KQueueServerSocketChannel]
-      override protected def group                   = new KQueueEventLoopGroup()
-    })
+  trait KQueueDomainTransport[C <: Channel] extends Transport[C] {
+    // one thread enough for the domain socket scenario.
+    override def group: EventLoopGroup = new KQueueEventLoopGroup(1)
+  }
 
-  implicit def kqueueDomainTransport(implicit system: ActorSystem): Option[Transport[KQueueDomainSocketChannel]] =
-    mayBe(new Transport[KQueueDomainSocketChannel] {
-      override private[netty] def channelClass       = classOf[KQueueDomainSocketChannel]
-      override private[netty] def serverChannelClass = classOf[KQueueServerDomainSocketChannel]
-      override protected def group                   = new KQueueEventLoopGroup(1) // one thread enough for the domain socket scenario.
-    })
+  implicit val kqueueServerSocketChannelT: Transport[KQueueServerSocketChannel] = new KQueueTransport[KQueueServerSocketChannel] {
+    override def channel = classOf[KQueueServerSocketChannel]
+  }
 
+  implicit val kqueueSocketChannelT: Transport[KQueueSocketChannel] = new KQueueTransport[KQueueSocketChannel] {
+    override def channel = classOf[KQueueSocketChannel]
+  }
+
+  implicit val kqueueServerDomainSocketChannelT: Transport[KQueueServerDomainSocketChannel] =
+    new KQueueDomainTransport[KQueueServerDomainSocketChannel] {
+      override def channel = classOf[KQueueServerDomainSocketChannel]
+    }
+
+  implicit val kqueueDomainSocketChannelT: Transport[KQueueDomainSocketChannel] = new KQueueDomainTransport[KQueueDomainSocketChannel] {
+    override def channel = classOf[KQueueDomainSocketChannel]
+  }
 }

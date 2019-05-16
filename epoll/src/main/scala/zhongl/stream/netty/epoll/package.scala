@@ -16,25 +16,33 @@
 
 package zhongl.stream.netty
 
-import akka.actor.ActorSystem
 import io.netty.channel.epoll._
+import io.netty.channel._
 
 package object epoll {
 
-  private def mayBe[C <: AbstractEpollStreamChannel](t: Transport[C]): Option[Transport[C]] = if (Epoll.isAvailable) Some(t) else None
+  trait EpollTransport[C <: Channel] extends Transport[C] {
+    override def group: EventLoopGroup = new EpollEventLoopGroup()
+  }
 
-  implicit def epollSocketTransport(implicit system: ActorSystem): Option[Transport[EpollSocketChannel]] =
-    mayBe(new Transport[EpollSocketChannel] {
-      override private[netty] def channelClass       = classOf[EpollSocketChannel]
-      override private[netty] def serverChannelClass = classOf[EpollServerSocketChannel]
-      override protected def group                   = new EpollEventLoopGroup()
-    })
+  trait EpollDomainTransport[C <: Channel] extends Transport[C] {
+    // one thread enough for the domain socket scenario.
+    override def group: EventLoopGroup = new EpollEventLoopGroup(1)
+  }
 
-  implicit def epollDomainTransport(implicit system: ActorSystem): Option[Transport[EpollDomainSocketChannel]] =
-    mayBe(new Transport[EpollDomainSocketChannel] {
-      override private[netty] def channelClass       = classOf[EpollDomainSocketChannel]
-      override private[netty] def serverChannelClass = classOf[EpollServerDomainSocketChannel]
-      override protected def group                   = new EpollEventLoopGroup(1) // one thread enough for the domain socket scenario.
-    })
+  implicit val epollServerSocketChannelT: Transport[EpollServerSocketChannel] = new EpollTransport[EpollServerSocketChannel] {
+    override def channel = classOf[EpollServerSocketChannel]
+  }
 
+  implicit val epollSocketChannelT: Transport[EpollSocketChannel] = new EpollTransport[EpollSocketChannel] {
+    override def channel = classOf[EpollSocketChannel]
+  }
+
+  implicit val epollServerDomainSocketChannelT: Transport[EpollServerDomainSocketChannel] = new EpollDomainTransport[EpollServerDomainSocketChannel] {
+    override def channel = classOf[EpollServerDomainSocketChannel]
+  }
+
+  implicit val epollDomainSocketChannelT: Transport[EpollDomainSocketChannel] = new EpollDomainTransport[EpollDomainSocketChannel] {
+    override def channel = classOf[EpollDomainSocketChannel]
+  }
 }
