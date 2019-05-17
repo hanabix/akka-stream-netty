@@ -24,13 +24,13 @@ import scala.reflect.ClassTag
 
 package object all {
 
-  implicit val socketChannel: Transport[SocketChannel]                         = findAvailable[SocketTransports, SocketChannel]
-  implicit val serverSocketChannel: Transport[ServerSocketChannel]             = findAvailable[SocketTransports, ServerSocketChannel]
-  implicit val domainSocketChannel: Transport[DomainSocketChannel]             = findAvailable[DomainSocketTransports, DomainSocketChannel]
-  implicit val serverDomainSocketChannel: Transport[ServerDomainSocketChannel] = findAvailable[DomainSocketTransports, ServerDomainSocketChannel]
+  implicit val sct: Transport[SocketChannel]               = findAvailable[SocketTransports, SocketChannel]
+  implicit val ssct: Transport[ServerSocketChannel]        = findAvailable[SocketTransports, ServerSocketChannel]
+  implicit val dsct: Transport[DomainSocketChannel]        = findAvailable[DomainSocketTransports, DomainSocketChannel]
+  implicit val sdsct: Transport[ServerDomainSocketChannel] = findAvailable[DomainSocketTransports, ServerDomainSocketChannel]
 
-  implicit private def socketSeq: Seq[SocketTransports]             = Seq(EpollTransports, KQueueTransports, NioTransports)
-  implicit private def domainSocketSeq: Seq[DomainSocketTransports] = Seq(EpollTransports, KQueueTransports)
+  implicit private def stss: Seq[SocketTransports]        = Seq(EpollTransports, KQueueTransports, NioTransports)
+  implicit private def dstss: Seq[DomainSocketTransports] = Seq(EpollTransports, KQueueTransports)
 
   private def findAvailable[T <: Transports, C <: Channel](
       implicit s: Seq[T],

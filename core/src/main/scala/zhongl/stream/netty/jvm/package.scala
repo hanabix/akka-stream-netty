@@ -15,21 +15,12 @@
  */
 package zhongl.stream.netty
 
-import io.netty.channel._
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio._
 
+//noinspection TypeAnnotation
 package object jvm {
 
-  trait NioTransport[C <: Channel] extends Transport[C] {
-    override def group: EventLoopGroup = new NioEventLoopGroup()
-  }
-
-  implicit val nioSocketChannelT: Transport[NioSocketChannel] = new NioTransport[NioSocketChannel] {
-    override def channel = classOf[NioSocketChannel]
-  }
-
-  implicit val nioServerSocketChannelT: Transport[NioServerSocketChannel] = new NioTransport[NioServerSocketChannel] {
-    override def channel = classOf[NioServerSocketChannel]
-  }
+  implicit val nsct  = Transport[NioSocketChannel](new NioEventLoopGroup())
+  implicit val nssct = Transport[NioServerSocketChannel](new NioEventLoopGroup())
 }
