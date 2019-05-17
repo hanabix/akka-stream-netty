@@ -17,32 +17,15 @@
 package zhongl.stream.netty
 
 import io.netty.channel.epoll._
-import io.netty.channel._
 
+//noinspection TypeAnnotation
 package object epoll {
 
-  trait EpollTransport[C <: Channel] extends Transport[C] {
-    override def group: EventLoopGroup = new EpollEventLoopGroup()
-  }
+  implicit val essct = Transport[EpollServerSocketChannel](new EpollEventLoopGroup())
 
-  trait EpollDomainTransport[C <: Channel] extends Transport[C] {
-    // one thread enough for the domain socket scenario.
-    override def group: EventLoopGroup = new EpollEventLoopGroup(1)
-  }
+  implicit val esct = Transport[EpollSocketChannel](new EpollEventLoopGroup())
 
-  implicit val epollServerSocketChannelT: Transport[EpollServerSocketChannel] = new EpollTransport[EpollServerSocketChannel] {
-    override def channel = classOf[EpollServerSocketChannel]
-  }
+  implicit val esdct = Transport[EpollServerDomainSocketChannel](new EpollEventLoopGroup(1))
 
-  implicit val epollSocketChannelT: Transport[EpollSocketChannel] = new EpollTransport[EpollSocketChannel] {
-    override def channel = classOf[EpollSocketChannel]
-  }
-
-  implicit val epollServerDomainSocketChannelT: Transport[EpollServerDomainSocketChannel] = new EpollDomainTransport[EpollServerDomainSocketChannel] {
-    override def channel = classOf[EpollServerDomainSocketChannel]
-  }
-
-  implicit val epollDomainSocketChannelT: Transport[EpollDomainSocketChannel] = new EpollDomainTransport[EpollDomainSocketChannel] {
-    override def channel = classOf[EpollDomainSocketChannel]
-  }
+  implicit val edsct = Transport[EpollDomainSocketChannel](new EpollEventLoopGroup(1))
 }

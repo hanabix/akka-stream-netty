@@ -19,6 +19,7 @@ package zhongl.stream.netty
 import io.netty.channel._
 
 import scala.concurrent.{Channel => _}
+import scala.reflect.ClassTag
 
 trait Transport[+C <: Channel] {
   def channel: Class[_ <: C]
@@ -27,4 +28,9 @@ trait Transport[+C <: Channel] {
 
 object Transport {
   def apply[C <: Channel](implicit t: Transport[C]) = t
+
+  def apply[C <: Channel: ClassTag](_group: EventLoopGroup): Transport[C] = new Transport[C] {
+    override def channel = implicitly[ClassTag[C]].runtimeClass.asInstanceOf[Class[C]]
+    override def group   = _group
+  }
 }
