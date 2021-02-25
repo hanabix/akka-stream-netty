@@ -8,16 +8,10 @@ A scala lib to adapt [netty](https://netty.io) transport to [akka-stream](https:
 
 > [alpakka-unix-domain-socket](https://github.com/akka/alpakka) would be a alternative if you only want to use unix domain socket.
 
-# Resolvers
-
-```scala
-resolvers += "jitpack" at "https://jitpack.io"
-```
-
 # Dependencies
 
 ```scala
-libraryDependencies += "com.github.zhongl.akka-stream-netty" %% "all" % <latest tag>
+libraryDependencies += "com.github.zhongl" %% "akka-stream-netty-all" % <latest tag>
 ```
 
 # Usage
