@@ -8,3 +8,5 @@ jobs:
       - uses: actions/checkout@v1
       - uses: olafurpg/setup-scala@v10
       - run: sbt coverage +test coverageReport coverageAggregate coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
