@@ -30,8 +30,7 @@ import io.netty.channel.socket.DuplexChannel
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
 
-/**
-  * As a extension of [[ActorSystem]], [[Netty]] provide some duplex network transport base on native lib.
+/** As a extension of [[ActorSystem]], [[Netty]] provide some duplex network transport base on native lib.
   */
 object Netty extends ExtensionId[Netty] with ExtensionIdProvider {
   def apply()(implicit system: ActorSystem): Netty = super.apply(system)
@@ -115,18 +114,17 @@ class Netty(system: ExtendedActorSystem) extends Extension {
         Sink.queue[ByteString](),
         Source.queue[ByteString](1, OverflowStrategy.fail)
       )(Keep.both)
-      .mapMaterializedValue {
-        case (sinkQ, sourceQ) =>
-          val handler = new ChannelInitializer[C] {
-            override def initChannel(ch: C): Unit = {
-              ch.pipeline()
-                .addLast(new ByteToByteStringCodec)
-                .addLast(new AkkaStreamChannelHandler(sourceQ, sinkQ)(system.log))
-            }
+      .mapMaterializedValue { case (sinkQ, sourceQ) =>
+        val handler = new ChannelInitializer[C] {
+          override def initChannel(ch: C): Unit = {
+            ch.pipeline()
+              .addLast(new ByteToByteStringCodec)
+              .addLast(new AkkaStreamChannelHandler(sourceQ, sinkQ)(system.log))
           }
+        }
 
-          bootstrap(Transport[C], handler, remoteAddress, localAddress, halfClose, connectTimeout)
-            .map(ch => OutgoingConnection(ch.localAddress(), ch.remoteAddress()))
+        bootstrap(Transport[C], handler, remoteAddress, localAddress, halfClose, connectTimeout)
+          .map(ch => OutgoingConnection(ch.localAddress(), ch.remoteAddress()))
       }
 
   }
