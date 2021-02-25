@@ -7,4 +7,4 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - uses: olafurpg/setup-scala@v10
-      - run: sbt +test
+      - run: sbt coverage +test coverageReport coverageAggregate coveralls
