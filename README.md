@@ -1,4 +1,4 @@
-# akka-stream-netty [![Build Status](https://travis-ci.org/zhongl/akka-stream-netty.svg?branch=master)](https://travis-ci.org/zhongl/akka-stream-netty) [![Version Badge](https://jitpack.io/v/zhongl/akka-stream-netty.svg)](https://jitpack.io/#zhongl/akka-stream-netty) [![Coveralls github](https://img.shields.io/coveralls/github/zhongl/akka-stream-netty.svg)](https://coveralls.io/github/zhongl/akka-stream-netty?branch=master) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/319be6e6e88c423e9e83d9c99e3e4fdc)](https://www.codacy.com/app/zhongl/akka-stream-netty?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=zhongl/akka-stream-netty&amp;utm_campaign=Badge_Grade)
+# akka-stream-netty [![Build Status](https://travis-ci.org/zhongl/akka-stream-netty.svg?branch=master)](https://travis-ci.org/zhongl/akka-stream-netty) [![Coveralls github](https://img.shields.io/coveralls/github/zhongl/akka-stream-netty.svg)](https://coveralls.io/github/zhongl/akka-stream-netty?branch=master) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/319be6e6e88c423e9e83d9c99e3e4fdc)](https://www.codacy.com/app/zhongl/akka-stream-netty?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=zhongl/akka-stream-netty&amp;utm_campaign=Badge_Grade)
 
 A scala lib to adapt [netty](https://netty.io) transport to [akka-stream](https://doc.akka.io/docs/akka/current/stream/index.html), which let us can use native transport with:
 
@@ -8,16 +8,10 @@ A scala lib to adapt [netty](https://netty.io) transport to [akka-stream](https:
 
 > [alpakka-unix-domain-socket](https://github.com/akka/alpakka) would be a alternative if you only want to use unix domain socket.
 
-# Resolvers
-
-```scala
-resolvers += "jitpack" at "https://jitpack.io"
-```
-
 # Dependencies
 
 ```scala
-libraryDependencies += "com.github.zhongl.akka-stream-netty" %% "all" % <latest tag>
+libraryDependencies += "com.github.zhongl" %% "akka-stream-netty-all" % <latest tag>
 ```
 
 # Usage
