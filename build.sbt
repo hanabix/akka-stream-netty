@@ -1,8 +1,9 @@
 import Dependencies._
 
+ThisBuild / organization := "com.github.zhongl"
+
 def commonSettings(module: String) = Seq(
   name := module,
-  organization := "com.github.zhongl",
   scalaVersion := "2.12.12",
   scalafmtOnCompile := true,
   scalacOptions ++= Seq(
