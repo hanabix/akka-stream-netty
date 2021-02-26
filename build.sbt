@@ -1,28 +1,30 @@
 import Dependencies._
 
-ThisBuild / organization := "com.github.zhongl"
-ThisBuild / homepage := Some(url("https://github.com/zhongl/akka-stream-netty"))
-ThisBuild / licenses := List(
-  "Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")
-)
-ThisBuild / developers := List(
-  Developer(
-    "zhongl",
-    "Lunfu Zhong",
-    "zhong.lunfu@gmail.com",
-    url("https://github.com/zhongl")
-  )
-)
-
-def commonSettings(module: String) = Seq(
-  name := module,
+inThisBuild(Seq(
   scalaVersion := "2.12.12",
   scalafmtOnCompile := true,
   scalacOptions ++= Seq(
     "-deprecation",
     "-encoding",
     "UTF-8"
+  ),
+  organization := "com.github.zhongl",
+  homepage := Some(url("https://github.com/zhongl/akka-stream-netty")),
+  licenses := List(
+    "Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")
+  ),
+  developers := List(
+    Developer(
+      "zhongl",
+      "Lunfu Zhong",
+      "zhong.lunfu@gmail.com",
+      url("https://github.com/zhongl")
+    )
   )
+))
+
+def commonSettings(module: String) = Seq(
+  name := module
 )
 
 lazy val core = (project in file("core"))
