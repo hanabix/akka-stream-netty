@@ -24,7 +24,7 @@ object Dependencies {
   }
 
   val common = Seq(
-    "org.scalatest" %% "scalatest" % "3.0.4" % Test,
+    "org.scalatest" %% "scalatest" % "3.0.9" % Test,
     "org.scalamock" %% "scalamock" % "4.4.0" % Test
   )
 

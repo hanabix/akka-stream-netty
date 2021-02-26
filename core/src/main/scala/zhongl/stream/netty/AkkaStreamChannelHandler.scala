@@ -24,8 +24,7 @@ import io.netty.channel._
 
 import scala.concurrent.ExecutionContext
 
-/**
-  * A channel handler to integrate akka stream with two queues.
+/** A channel handler to integrate akka stream with two queues.
   *
   * Caution: the [[ChannelConfig.isAutoRead]] supposed to be `false` for back-pressure.
   */
@@ -81,7 +80,7 @@ class AkkaStreamChannelHandler[In, Out](sourceQ: SourceQueueWithComplete[In], si
       .map(debug(_) {
         case QueueOfferResult.QueueClosed               => ctx.close()
         case QueueOfferResult.Enqueued if sinkCompleted => ctx.close() // As a client, close channel if no more request
-        case QueueOfferResult.Enqueued                  => ctx.read() // As a client, keep on reading
+        case QueueOfferResult.Enqueued                  => ctx.read()  // As a client, keep on reading
         case QueueOfferResult.Dropped                   => exceptionCaught(ctx, illegal)
         case QueueOfferResult.Failure(e)                => exceptionCaught(ctx, e)
       })
