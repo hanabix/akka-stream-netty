@@ -2,13 +2,14 @@ import Dependencies._
 
 inThisBuild(
   Seq(
-    scalaVersion := "2.12.12",
+    scalaVersion := "2.13.4",
     scalafmtOnCompile := true,
     scalacOptions ++= Seq(
       "-deprecation",
       "-encoding",
       "UTF-8"
     ),
+    crossScalaVersions := Seq(scalaVersion.value, "2.12.12"),
     organization := "com.github.zhongl",
     homepage := Some(url("https://github.com/zhongl/akka-stream-netty")),
     licenses := List(
