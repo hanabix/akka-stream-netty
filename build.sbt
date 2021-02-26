@@ -1,31 +1,40 @@
 import Dependencies._
 
-inThisBuild(Seq(
-  scalaVersion := "2.12.12",
-  scalafmtOnCompile := true,
-  scalacOptions ++= Seq(
-    "-deprecation",
-    "-encoding",
-    "UTF-8"
-  ),
-  organization := "com.github.zhongl",
-  homepage := Some(url("https://github.com/zhongl/akka-stream-netty")),
-  licenses := List(
-    "Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")
-  ),
-  developers := List(
-    Developer(
-      "zhongl",
-      "Lunfu Zhong",
-      "zhong.lunfu@gmail.com",
-      url("https://github.com/zhongl")
+inThisBuild(
+  Seq(
+    scalaVersion := "2.12.12",
+    scalafmtOnCompile := true,
+    scalacOptions ++= Seq(
+      "-deprecation",
+      "-encoding",
+      "UTF-8"
+    ),
+    organization := "com.github.zhongl",
+    homepage := Some(url("https://github.com/zhongl/akka-stream-netty")),
+    licenses := List(
+      "Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")
+    ),
+    developers := List(
+      Developer(
+        "zhongl",
+        "Lunfu Zhong",
+        "zhong.lunfu@gmail.com",
+        url("https://github.com/zhongl")
+      )
     )
   )
-))
+)
 
 def commonSettings(module: String) = Seq(
   name := module
 )
+
+lazy val root = (project in file("."))
+  .settings(
+    commonSettings("akka-stream-netty"),
+    publish / skip := true
+  )
+  .aggregate(core, epoll, kqueue, all)
 
 lazy val core = (project in file("core"))
   .settings(
