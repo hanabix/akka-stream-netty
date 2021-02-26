@@ -20,12 +20,12 @@ object Dependencies {
 
   object Version {
     val akka  = "2.5.32"
-    val netty = "4.1.35.Final"
+    val netty = "4.1.59.Final"
   }
 
   val common = Seq(
-    "org.scalatest" %% "scalatest" % "3.0.4" % Test,
-    "org.scalamock" %% "scalamock" % "4.1.0" % Test
+    "org.scalatest" %% "scalatest" % "3.0.9" % Test,
+    "org.scalamock" %% "scalamock" % "4.4.0" % Test
   )
 
   val akka = Seq(

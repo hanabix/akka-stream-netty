@@ -32,8 +32,8 @@ package object all {
   implicit private def stss: Seq[SocketTransports]        = Seq(EpollTransports, KQueueTransports, NioTransports)
   implicit private def dstss: Seq[DomainSocketTransports] = Seq(EpollTransports, KQueueTransports)
 
-  private def findAvailable[T <: Transports, C <: Channel](
-      implicit s: Seq[T],
+  private def findAvailable[T <: Transports, C <: Channel](implicit
+      s: Seq[T],
       c: ClassTag[C],
       g: GetTransport[T, C]
   ): Transport[C] = {
