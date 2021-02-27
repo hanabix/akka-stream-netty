@@ -2,9 +2,8 @@ package zhongl.stream.netty.all
 
 import java.net._
 import java.nio.file.Files
-
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.{ActorMaterializer, Materializer}
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.testkit.TestKit
 import akka.util.ByteString
@@ -21,7 +20,7 @@ import org.scalatest.wordspec.AsyncWordSpecLike
 
 class ImplicitlySpec extends TestKit(ActorSystem("implicitly")) with AsyncWordSpecLike with Matchers with BeforeAndAfterAll {
 
-  implicit val mat = ActorMaterializer()
+  implicit val mat = Materializer(system)
   implicit val ec  = system.dispatcher
 
   "import all._" should {

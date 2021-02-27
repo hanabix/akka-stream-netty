@@ -17,9 +17,8 @@
 package zhongl.stream.netty
 
 import java.net.InetSocketAddress
-
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.{ActorMaterializer, Materializer}
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.testkit.TestKit
 import akka.util.ByteString
@@ -32,7 +31,7 @@ class NettySpec extends TestKit(ActorSystem("netty")) with AsyncWordSpecLike wit
 
   import jvm._
 
-  implicit val mat = ActorMaterializer()
+  implicit val mat = Materializer(system)
 
   "Netty" should {
     "use nio transport" in {

@@ -36,7 +36,7 @@ object Netty extends ExtensionId[Netty] with ExtensionIdProvider {
   def apply()(implicit system: ActorSystem): Netty = super.apply(system)
 
   override def createExtension(system: ExtendedActorSystem): Netty = new Netty(system)
-  override def lookup(): ExtensionId[_ <: Extension]               = Netty
+  override def lookup: ExtensionId[_ <: Extension]                 = Netty
 
   final case class OutgoingConnection(localAddress: SocketAddress, remoteAddress: SocketAddress)
   final case class IncomingConnection(localAddress: SocketAddress, remoteAddress: SocketAddress, flow: Flow[ByteString, ByteString, NotUsed])
@@ -65,7 +65,7 @@ class Netty(system: ExtendedActorSystem) extends Extension {
       halfClose: Boolean = false
   ): Source[IncomingConnection, Future[ServerBinding]] = {
 
-    implicit val mat = ActorMaterializer()(system)
+    implicit val mat = Materializer(system)
 
     CoordinatedShutdown(system).addJvmShutdownHook(Transport[C].group.shutdownGracefully())
 
