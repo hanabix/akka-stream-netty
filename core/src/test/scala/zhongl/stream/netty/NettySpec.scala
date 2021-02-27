@@ -25,6 +25,8 @@ import akka.testkit.TestKit
 import akka.util.ByteString
 import io.netty.channel.socket._
 import org.scalatest._
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AsyncWordSpecLike
 
 class NettySpec extends TestKit(ActorSystem("netty")) with AsyncWordSpecLike with Matchers with BeforeAndAfterAll {
 
