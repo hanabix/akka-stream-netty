@@ -16,6 +16,8 @@ import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.channel.unix._
 import org.scalatest._
 import zhongl.stream.netty._
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AsyncWordSpecLike
 
 class ImplicitlySpec extends TestKit(ActorSystem("implicitly")) with AsyncWordSpecLike with Matchers with BeforeAndAfterAll {
 
