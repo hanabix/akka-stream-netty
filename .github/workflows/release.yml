@@ -1,7 +1,6 @@
 name: Release
 
 on: 
-  workflow_dispatch:
   milestone:
     types: [closed]
 
@@ -10,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Create a release with title of milestone
-      run: gh -R $GITHUB_REPOSITORY release create $REL_TAG -t $REL_TAG -n "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/milestone/$MS_ID"
+      run: gh -R $GITHUB_REPOSITORY release create $REL_TAG -t $REL_TAG -n "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/milestone/$MS_ID?closed=1"
       env:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         REL_TAG: ${{github.event.milestone.title}}
