@@ -2,8 +2,9 @@ name: Publish
 on:
   release:
     types: 
-     - created
-     - edited
+      - created
+  push:
+    tags: ["v*"]
 jobs:
   publish:
     runs-on: ubuntu-20.04
