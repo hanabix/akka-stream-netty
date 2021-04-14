@@ -1,6 +1,7 @@
 name: Release
 
 on: 
+  workflow_dispatch:
   milestone:
     types: [closed]
 
