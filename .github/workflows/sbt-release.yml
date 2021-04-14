@@ -3,8 +3,7 @@ on:
   release:
     types: 
      - created
-     - published
-     - released
+     - edited
 jobs:
   publish:
     runs-on: ubuntu-20.04
