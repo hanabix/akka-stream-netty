@@ -9,12 +9,9 @@ jobs:
   releasing:
     runs-on: ubuntu-latest
     steps:
-    - name: echo event path
-      run: echo $M_TITLE $M_NUMBER
-      env:
-        M_TITLE: ${{github.event.milestone.title}}
-        M_NUMBER: ${{github.event.milestone.number}}
     - name: Create a release with title of milestone
-      run: gh help release
+      run: gh release create $REL_TAG  -n "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/milestone/$MS_ID"
       env:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        REL_TAG: ${{github.event.milestone.title}}
+        MS_ID: ${{github.event.milestone.number}}
