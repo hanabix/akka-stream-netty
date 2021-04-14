@@ -1,0 +1,16 @@
+name: Release
+
+on: 
+  milestone:
+    types: [closed]
+
+jobs:
+  releasing:
+    runs-on: ubuntu-latest
+    steps:
+    - name: echo event path
+      run: echo ${GITHUB_EVENT_PATH}
+    - name: Create a release with title of milestone
+      run: gh help release
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
