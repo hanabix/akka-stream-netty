@@ -11,7 +11,7 @@ inThisBuild(
     ),
     crossScalaVersions := Seq(scalaVersion.value, "2.12.12"),
     organization := "com.github.zhongl",
-    homepage := Some(url("https://github.com/zhongl/akka-stream-netty")),
+    homepage := Some(url("https://github.com/hanabix/akka-stream-netty")),
     licenses := List(
       "Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")
     ),
