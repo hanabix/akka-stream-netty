@@ -19,7 +19,7 @@ import sbt._
 object Dependencies {
 
   object Version {
-    val akka  = "2.6.14"
+    val akka  = "2.6.15"
     val netty = "4.1.65.Final"
   }
 
