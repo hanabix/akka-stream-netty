@@ -9,16 +9,15 @@ on:
 
 jobs:
   coverage-aggregate:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
-#       - uses: actions/checkout@v1
-#       - uses: olafurpg/setup-scala@v13
-#       - name: branch-names
-#         id: branch-name
-#         uses: tj-actions/branch-names@v2.2
-#       - run: sbt coverage test coverageReport
-
-      - run: sbt coveralls
+      - uses: actions/checkout@v1
+      - uses: olafurpg/setup-scala@v13
+      - name: branch-names
+        id: branch-name
+        uses: tj-actions/branch-names@v2.2
+      - run: sbt coverage test coverageReport
+      - run: sbt coverageAggregate coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CI_BRANCH: ${{ steps.branch-name.outputs.current_branch }}
