@@ -18,7 +18,7 @@ jobs:
 #         uses: tj-actions/branch-names@v2.2
 #       - run: sbt coverage test coverageReport
       - run: echo "$GITHUB_RUN_ID"
-      - run: scala -e 'new java.io.PrintWriter("test.txt") { write(sys.env("COVERALLS_REPO_TOKEN")); close }'
+      - run: sbt coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
           CI_BRANCH: ${{ steps.branch-name.outputs.current_branch }}
