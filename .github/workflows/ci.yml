@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: olafurpg/setup-scala@v10
+      - uses: olafurpg/setup-scala@v13
       - name: branch-names
         id: branch-name
         uses: tj-actions/branch-names@v2.2
@@ -20,5 +20,4 @@ jobs:
       - run: sbt coverageAggregate coveralls 
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-          COVERALLS_FLAG_NAME: Scala ${{ matrix.scala }}
           CI_BRANCH: ${{ steps.branch-name.outputs.current_branch }}
