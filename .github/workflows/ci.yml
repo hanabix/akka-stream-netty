@@ -19,4 +19,5 @@ jobs:
       - run: sbt coverage +test coverageReport coverageAggregate coveralls 
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          COVERALLS_FLAG_NAME: Scala ${{ matrix.scala }}
           CI_BRANCH: ${{ steps.branch-name.outputs.current_branch }}
