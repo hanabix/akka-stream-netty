@@ -17,7 +17,7 @@ jobs:
         id: branch-name
         uses: tj-actions/branch-names@v2.2
       - run: sbt coverage test coverageReport
-      - run: sbt coverageAggregate coveralls
+      - run: scala -e 'println("COVERALLS_REPO_TOKEN")'
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
           CI_BRANCH: ${{ steps.branch-name.outputs.current_branch }}
