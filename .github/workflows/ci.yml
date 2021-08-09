@@ -16,7 +16,7 @@ jobs:
       - name: branch-names
         id: branch-name
         uses: tj-actions/branch-names@v2.2
-      - run: sbt coverage +test coverageReport
+      - run: sbt coverage test coverageReport
       - run: echo ${{ env.COVERALLS_REPO_TOKEN }} "$COVERALLS_REPO_TOKEN"
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
