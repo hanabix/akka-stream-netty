@@ -9,7 +9,7 @@ on:
 
 jobs:
   coverage-aggregate:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v1
       - uses: olafurpg/setup-scala@v13
