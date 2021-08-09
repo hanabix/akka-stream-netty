@@ -11,12 +11,12 @@ jobs:
   coverage-aggregate:
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v1
-      - uses: olafurpg/setup-scala@v13
-      - name: branch-names
-        id: branch-name
-        uses: tj-actions/branch-names@v2.2
-      - run: sbt coverage test coverageReport
+#       - uses: actions/checkout@v1
+#       - uses: olafurpg/setup-scala@v13
+#       - name: branch-names
+#         id: branch-name
+#         uses: tj-actions/branch-names@v2.2
+#       - run: sbt coverage test coverageReport
       - run: scala -e 'println("COVERALLS_REPO_TOKEN")'
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
