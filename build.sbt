@@ -2,20 +2,20 @@ import Dependencies._
 
 inThisBuild(
   Seq(
-    scalaVersion := "2.13.4",
-    scalafmtOnCompile := true,
+    scalaVersion       := "2.13.4",
+    scalafmtOnCompile  := true,
     scalacOptions ++= Seq(
       "-deprecation",
       "-encoding",
       "UTF-8"
     ),
     crossScalaVersions := Seq(scalaVersion.value, "2.12.12"),
-    organization := "com.github.zhongl",
-    homepage := Some(url("https://github.com/hanabix/akka-stream-netty")),
-    licenses := List(
+    organization       := "com.github.zhongl",
+    homepage           := Some(url("https://github.com/hanabix/akka-stream-netty")),
+    licenses           := List(
       "Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")
     ),
-    developers := List(
+    developers         := List(
       Developer(
         "zhongl",
         "Lunfu Zhong",
