@@ -58,6 +58,6 @@ object BootstrapMagnet {
       .connect(remote)
   }
 
-  @inline private def integer(d: Duration): Integer =
+  @inline private def integer(d: Duration): Integer                                                                          =
     if (d.isFinite) d.toMillis.asInstanceOf[Integer] else Integer.MAX_VALUE
 }

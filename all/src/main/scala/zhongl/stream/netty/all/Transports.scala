@@ -30,23 +30,23 @@ private[all] trait Transports {
   def available: Boolean
 }
 
-private[all] trait SocketTransports extends Transports {
+private[all] trait SocketTransports       extends Transports                                   {
   def socketChannelT: Transport[SocketChannel]
   def serverSocketChannelT: Transport[ServerSocketChannel]
 }
 
-private[all] trait DomainSocketTransports extends Transports {
+private[all] trait DomainSocketTransports extends Transports                                   {
   def domainSocketChannelT: Transport[DomainSocketChannel]
   def serverDomainSocketChannelT: Transport[ServerDomainSocketChannel]
 }
 
-private[all] object NioTransports extends SocketTransports {
+private[all] object NioTransports         extends SocketTransports                             {
   override def available: Boolean                                   = true
   override def socketChannelT: Transport[SocketChannel]             = Transport[NioSocketChannel]
   override def serverSocketChannelT: Transport[ServerSocketChannel] = Transport[NioServerSocketChannel]
 }
 
-private[all] object EpollTransports extends SocketTransports with DomainSocketTransports {
+private[all] object EpollTransports       extends SocketTransports with DomainSocketTransports {
   override def available: Boolean                                               = Epoll.isAvailable
   override def socketChannelT: Transport[SocketChannel]                         = Transport[EpollSocketChannel]
   override def serverSocketChannelT: Transport[ServerSocketChannel]             = Transport[EpollServerSocketChannel]
@@ -54,7 +54,7 @@ private[all] object EpollTransports extends SocketTransports with DomainSocketTr
   override def serverDomainSocketChannelT: Transport[ServerDomainSocketChannel] = Transport[EpollServerDomainSocketChannel]
 }
 
-private[all] object KQueueTransports extends SocketTransports with DomainSocketTransports {
+private[all] object KQueueTransports      extends SocketTransports with DomainSocketTransports {
   override def available: Boolean                                               = KQueue.isAvailable
   override def socketChannelT: Transport[SocketChannel]                         = Transport[KQueueSocketChannel]
   override def serverSocketChannelT: Transport[ServerSocketChannel]             = Transport[KQueueServerSocketChannel]

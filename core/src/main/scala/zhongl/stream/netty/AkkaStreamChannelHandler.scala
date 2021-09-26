@@ -38,33 +38,33 @@ class AkkaStreamChannelHandler[In, Out](sourceQ: SourceQueueWithComplete[In], si
   /** Thread safe was guaranteed by [[EventLoopGroup]] */
   private var sinkCompleted = false
 
-  override def channelActive(ctx: ChannelHandlerContext): Unit = {
+  override def channelActive(ctx: ChannelHandlerContext): Unit                             = {
     log.debug("[{}] active", ctx.channel())
     ctx.read()
     pullSourceToOutBound(ctx)
   }
 
-  override def channelInactive(ctx: ChannelHandlerContext): Unit = {
+  override def channelInactive(ctx: ChannelHandlerContext): Unit                           = {
     log.debug("[{}] inactive", ctx.channel())
     sourceQ.complete()
     sinkQ.cancel()
   }
 
-  override def channelRead(ctx: ChannelHandlerContext, msg: AnyRef): Unit = {
+  override def channelRead(ctx: ChannelHandlerContext, msg: AnyRef): Unit                  = {
     offerSinkFromInBound(msg)(ctx)
   }
 
-  override def channelWritabilityChanged(ctx: ChannelHandlerContext): Unit = {
+  override def channelWritabilityChanged(ctx: ChannelHandlerContext): Unit                 = {
     pullSourceToOutBound(ctx)
   }
 
-  override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
+  override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit         = {
     log.error(cause, "[{}] close by", ctx.channel())
     ctx.close()
   }
 
   private def offerSinkFromInBound(msg: AnyRef)(implicit ctx: ChannelHandlerContext): Unit = {
-    @inline def illegal = {
+    @inline def illegal                              = {
       new IllegalStateException("Element should not be dropped, please check overflow strategy.")
     }
 

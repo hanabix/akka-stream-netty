@@ -25,7 +25,7 @@ import io.netty.handler.codec.ByteToMessageCodec
 
 class ByteToByteStringCodec extends ByteToMessageCodec[ByteString] {
 
-  override def encode(ctx: ChannelHandlerContext, msg: ByteString, out: ByteBuf): Unit = {
+  override def encode(ctx: ChannelHandlerContext, msg: ByteString, out: ByteBuf): Unit       = {
     out.writeBytes(msg.asByteBuffer)
   }
 

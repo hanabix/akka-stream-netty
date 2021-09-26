@@ -25,7 +25,7 @@ private[all] trait GetTransport[T <: Transports, C <: Channel] {
   def apply(t: T): Transport[C]
 }
 
-private[all] object GetTransport {
+private[all] object GetTransport                               {
   implicit val getSocketChannelT: GetTransport[SocketTransports, SocketChannel]                               = _.socketChannelT
   implicit val getServerSocketChannelT: GetTransport[SocketTransports, ServerSocketChannel]                   = _.serverSocketChannelT
   implicit val getDomainSocketChannelT: GetTransport[DomainSocketTransports, DomainSocketChannel]             = _.domainSocketChannelT
