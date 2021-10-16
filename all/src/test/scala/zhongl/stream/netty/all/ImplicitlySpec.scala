@@ -73,5 +73,5 @@ class ImplicitlySpec extends TestKit(ActorSystem("implicitly")) with AsyncWordSp
         .flatMap(a => sb.unbind().map(_ => a))
     }
   }
-  override protected def afterAll(): Unit = TestKit.shutdownActorSystem(system)
+  override protected def afterAll(): Unit                                                                                        = TestKit.shutdownActorSystem(system)
 }
