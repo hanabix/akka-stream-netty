@@ -19,8 +19,8 @@ import sbt._
 object Dependencies {
 
   object Version {
+    val akka  = "2.6.19"
     val netty = "4.1.75.Final"
-    val akka  = "2.6.18"
   }
 
   val common = Seq(
