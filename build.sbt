@@ -2,7 +2,7 @@ import Dependencies._
 
 inThisBuild(
   Seq(
-    scalaVersion       := "2.13.8",
+    scalaVersion       := "2.13.11",
     scalafmtOnCompile  := true,
     scalacOptions ++= Seq(
       "-deprecation",
