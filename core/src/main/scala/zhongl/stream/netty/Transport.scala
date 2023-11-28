@@ -33,4 +33,12 @@ object Transport {
     override def channel = implicitly[ClassTag[C]].runtimeClass.asInstanceOf[Class[C]]
     override def group   = _group
   }
+
+  def dummy[C <: Channel: ClassTag] = new Dummy(implicitly[ClassTag[C]])
+
+  class Dummy[C <: Channel](c: ClassTag[C]) extends Transport[C] {
+    override def channel: Class[_ <: C] = c.runtimeClass.asInstanceOf[Class[C]]
+    override def group: EventLoopGroup  = throw new UnsupportedOperationException(s"${channel.getName} is unavailable in your environment")
+
+  }
 }
