@@ -24,10 +24,10 @@ import scala.reflect.ClassTag
 
 package object all {
 
-  implicit val sct: Transport[SocketChannel]               = findAvailable[SocketTransports, SocketChannel]
-  implicit val ssct: Transport[ServerSocketChannel]        = findAvailable[SocketTransports, ServerSocketChannel]
-  implicit val dsct: Transport[DomainSocketChannel]        = findAvailable[DomainSocketTransports, DomainSocketChannel]
-  implicit val sdsct: Transport[ServerDomainSocketChannel] = findAvailable[DomainSocketTransports, ServerDomainSocketChannel]
+  implicit def sct: Transport[SocketChannel]               = findAvailable[SocketTransports, SocketChannel]
+  implicit def ssct: Transport[ServerSocketChannel]        = findAvailable[SocketTransports, ServerSocketChannel]
+  implicit def dsct: Transport[DomainSocketChannel]        = findAvailable[DomainSocketTransports, DomainSocketChannel]
+  implicit def sdsct: Transport[ServerDomainSocketChannel] = findAvailable[DomainSocketTransports, ServerDomainSocketChannel]
 
   implicit private def stss: Seq[SocketTransports]        = Seq(EpollTransports, KQueueTransports, NioTransports)
   implicit private def dstss: Seq[DomainSocketTransports] = Seq(EpollTransports, KQueueTransports)
@@ -37,9 +37,7 @@ package object all {
       c: ClassTag[C],
       g: GetTransport[T, C]
   ): Transport[C] = {
-    s.find(_.available).map(g(_)).getOrElse {
-      throw new IllegalStateException(s"${c.runtimeClass.getName} is unavailable in your environment")
-    }
+    s.find(_.available).map(g(_)).getOrElse { Transport.dummy[C] }
   }
 
 }

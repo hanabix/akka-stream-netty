@@ -2,6 +2,7 @@ package zhongl.stream.netty.all
 
 import java.net._
 import java.nio.file.Files
+import scala.concurrent.Future
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, Materializer}
 import akka.stream.scaladsl.{Flow, Sink, Source}
@@ -45,7 +46,7 @@ class ImplicitlySpec extends TestKit(ActorSystem("implicitly")) with AsyncWordSp
       } else if (Epoll.isAvailable) {
         cc shouldBe classOf[EpollDomainSocketChannel]
       } else {
-        assertThrows[IllegalStateException](cc)
+        cc shouldBe classOf[DomainSocketChannel]
       }
     }
 
@@ -62,7 +63,10 @@ class ImplicitlySpec extends TestKit(ActorSystem("implicitly")) with AsyncWordSp
     }
   }
 
-  private def runEcho[C <: DuplexChannel, S <: ServerChannel](address: SocketAddress)(implicit t: Transport[C], s: Transport[S]) = {
+  private def runEcho[C <: DuplexChannel, S <: ServerChannel](
+      address: SocketAddress
+  )(implicit t: Transport[C], s: Transport[S]): Future[Assertion] = {
+    if (t.isInstanceOf[Transport.Dummy[C]]) return Future(Assertions.succeed)
     Netty().bindAndHandle[S](Flow[ByteString].map(identity), address).flatMap { sb =>
       val msg = ByteString("a")
       Source
@@ -73,5 +77,5 @@ class ImplicitlySpec extends TestKit(ActorSystem("implicitly")) with AsyncWordSp
         .flatMap(a => sb.unbind().map(_ => a))
     }
   }
-  override protected def afterAll(): Unit                                                                                        = TestKit.shutdownActorSystem(system)
+  override protected def afterAll(): Unit = TestKit.shutdownActorSystem(system)
 }
