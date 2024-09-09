@@ -9,7 +9,7 @@ inThisBuild(
       "-encoding",
       "UTF-8"
     ),
-    crossScalaVersions := Seq(scalaVersion.value, "2.12.18"),
+    crossScalaVersions := Seq(scalaVersion.value, "2.12.20"),
     organization       := "com.github.zhongl",
     homepage           := Some(url("https://github.com/hanabix/akka-stream-netty")),
     licenses           := List(
