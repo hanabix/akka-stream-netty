@@ -10,6 +10,8 @@ jobs:
         with:
           fetch-depth: 0
       - uses: coursier/setup-action@v1
+        with:
+          apps: sbt
       - uses: olafurpg/setup-gpg@v3
       - run: sbt ci-release
         env:

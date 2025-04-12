@@ -19,13 +19,13 @@ import sbt._
 object Dependencies {
 
   object Version {
-    val akka  = "2.6.19"
-    val netty = "4.1.101.Final"
+    val akka  = "2.8.8"
+    val netty = "4.1.119.Final"
   }
 
   val common = Seq(
-    "org.scalatest" %% "scalatest" % "3.2.17" % Test,
-    "org.scalamock" %% "scalamock" % "5.2.0"  % Test
+    "org.scalatest" %% "scalatest" % "3.2.19" % Test,
+    "org.scalamock" %% "scalamock" % "7.3.0"  % Test
   )
 
   val akka = Seq(
